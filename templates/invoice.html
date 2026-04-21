@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faktura {{ invoice.invoice_number }}</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- =========================================================
+     1. HEADER
+     ========================================================= -->
+<div class="header">
+    <div>
+        <div class="header-title">Krajowy System <span class="e">e</span>-Faktur</div>
+    </div>
+    <div class="header-right">
+        <div class="label-field">Numer Faktury / Invoice Number:</div>
+        <div class="invoice-number">{{ invoice.invoice_number }}</div>
+        <div style="font-size: 11px; margin-top: 2px;">{{ invoice_type_pl }} / {{ invoice_type_en }}</div>
+        {% if invoice.ksef_number %}
+        <div class="label-field" style="margin-top: 2px;">Numer KSeF / KSeF Number:</div>
+        <div style="font-size: 10px; font-weight: bold;">{{ invoice.ksef_number }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- =========================================================
+     2. SELLER / BUYER
+     ========================================================= -->
+<div class="parties">
+    <div class="party">
+        <div class="section-title">Sprzedawca / Seller</div>
+        {% if invoice.seller.vat_prefix %}
+        <div class="label-field">Prefiks VAT / VAT Prefix: <span style="color: #000;">{{ invoice.seller.vat_prefix }}</span></div>
+        {% endif %}
+        {% if invoice.seller.nip %}
+        <div class="label-field">NIP: <span style="color: #000; font-weight: bold;">{{ invoice.seller.nip }}</span></div>
+        {% endif %}
+        <div class="label-field">Nazwa / Name: <span style="color: #000; font-weight: bold;">{{ invoice.seller.name }}</span></div>
+        <div class="label-field" style="margin-top: 6px;">Adres / Address:</div>
+        <div style="font-size: 10px; margin-left: 8px;">{{ invoice.seller.address.line1 }}</div>
+        {% if invoice.seller.address.line2 %}
+        <div style="font-size: 10px; margin-left: 8px;">{{ invoice.seller.address.line2 }}</div>
+        {% endif %}
+        <div style="font-size: 10px; margin-left: 8px;">{{ seller_country_pl }} / {{ seller_country_en }}</div>
+    </div>
+
+    <div class="party">
+        <div class="section-title">Nabywca / Buyer</div>
+        {% if invoice.buyer.nip %}
+        <div class="label-field">NIP: <span style="color: #000; font-weight: bold;">{{ invoice.buyer.nip }}</span></div>
+        {% elif invoice.buyer.no_identifier %}
+        <div class="label-field">Brak identyfikatora / No identifier</div>
+        {% endif %}
+        <div class="label-field">Nazwa / Name: <span style="color: #000; font-weight: bold;">{{ invoice.buyer.name }}</span></div>
+        <div class="label-field" style="margin-top: 6px;">Adres / Address:</div>
+        <div style="font-size: 10px; margin-left: 8px;">{{ invoice.buyer.address.line1 }}</div>
+        {% if invoice.buyer.address.line2 %}
+        <div style="font-size: 10px; margin-left: 8px;">{{ invoice.buyer.address.line2 }}</div>
+        {% endif %}
+        <div style="font-size: 10px; margin-left: 8px;">{{ buyer_country_pl }} / {{ buyer_country_en }}</div>
+        <div class="label-field" style="margin-top: 6px;">
+            Jednostka podrzędna JST / JST subsidiary:
+            <span style="color: #000;">{% if invoice.buyer.jst %}TAK / YES{% else %}NIE / NO{% endif %}</span>
+        </div>
+        <div class="label-field">
+            Członek grupy GV / GV group member:
+            <span style="color: #000;">{% if invoice.buyer.gv %}TAK / YES{% else %}NIE / NO{% endif %}</span>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     3. DETAILS (dates, currency, exchange rate)
+     ========================================================= -->
+<div class="details-box">
+    <div class="section-title">Szczegóły / Details</div>
+    <div class="details-grid">
+        <div>
+            <div class="label-field">Data wystawienia, z zastrzeżeniem art. 106na ust. 1 ustawy:</div>
+            <div class="label-en">Invoice date:</div>
+            <div class="bold" style="margin-top: 2px;">
+                {% set d = invoice.invoice_date %}
+                {{ d[8:10] }}.{{ d[5:7] }}.{{ d[0:4] }}
+            </div>
+            <div style="margin-top: 8px;">
+                <div class="label-field">Kod waluty / Currency code: <span style="color: #000; font-weight: bold;">{{ invoice.currency }}</span></div>
+            </div>
+            {% if invoice.exchange_rate %}
+            <div class="label-field">Kurs waluty / Exchange rate: <span style="color: #000;">{{ exchange_rate_formatted }}</span></div>
+            {% if exchange_rate_is_global %}
+            <div class="label-en" style="font-style: italic; margin-top: 2px;">Kurs waluty wspólny dla wszystkich wierszy faktury</div>
+            <div class="label-en" style="font-style: italic;">Exchange rate common for all invoice lines</div>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div>
+            {% if invoice.sale_date %}
+            <div class="label-field">Data dokonania lub zakończenia dostawy towarów lub wykonania usługi:</div>
+            <div class="label-en">Date of supply / service completion:</div>
+            <div class="bold" style="margin-top: 2px;">
+                {% set sd = invoice.sale_date %}
+                {{ sd[8:10] }}.{{ sd[5:7] }}.{{ sd[0:4] }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     4. LINE ITEMS TABLE
+     ========================================================= -->
+<div class="section">
+    <div class="section-title">Pozycje / Line Items</div>
+    <div style="font-size: 10px; color: #555; margin-bottom: 6px; font-style: italic;">
+        Faktura wystawiona w walucie {{ invoice.currency }} / Invoice issued in {{ invoice.currency }}
+    </div>
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width:25px;">Lp.<br /><span class="en">No</span></th>
+                <th style="text-align: left;">Nazwa towaru lub usługi<br /><span class="en">Name of goods/services</span></th>
+                <th style="width:80px;">Cena jedn. netto<br /><span class="en">Unit net price</span></th>
+                <th style="width:35px;">Ilość<br /><span class="en">Qty</span></th>
+                <th style="width:65px;">Miara<br /><span class="en">Unit</span></th>
+                <th style="width:55px;">Stawka podatku<br /><span class="en">Tax rate</span></th>
+                <th style="width:85px;">Wartość sprzedaży netto<br /><span class="en">Net sales value</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.line_items %}
+            <tr>
+                <td class="text-center">{{ item.line_number }}</td>
+                <td>{{ item.name }}</td>
+                <td class="text-right">{{ format_amount(item.unit_net_price) }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-center">{{ item.unit }}</td>
+                <td class="text-center">{{ tax_rate_display(item.tax_rate) }}</td>
+                <td class="text-right">{{ format_amount(item.net_value) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="total-row">
+        <span>Kwota należności ogółem / Total amount due:</span>
+        <span class="total-amount">{{ format_amount(invoice.total_amount) }} {{ invoice.currency }}</span>
+    </div>
+</div>
+
+<!-- =========================================================
+     5. VAT SUMMARY TABLE
+     ========================================================= -->
+{% if invoice.tax_summary %}
+<div class="section">
+    <div class="section-title">Podsumowanie stawek podatku / VAT Tax Summary</div>
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width:25px;">Lp.<br /><span class="en">No</span></th>
+                <th style="text-align: left;">Stawka podatku<br /><span class="en">Tax rate</span></th>
+                <th style="width:90px;">Kwota netto<br /><span class="en">Net amount</span></th>
+                <th style="width:80px;">Kwota podatku<br /><span class="en">Tax amount</span></th>
+                <th style="width:90px;">Kwota brutto<br /><span class="en">Gross amount</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in invoice.tax_summary %}
+            <tr>
+                <td class="text-center">{{ loop.index }}</td>
+                {% set label = tax_summary_label(row.rate_code) %}
+                {% set label_parts = label.split('\n') %}
+                <td style="font-size: 9px;">
+                    {{ label_parts[0] }}
+                    {% if label_parts|length > 1 %}
+                    <br /><span class="en">{{ label_parts[1] }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-right">{{ format_amount(row.net_amount) }}</td>
+                <td class="text-right">{{ format_amount(row.tax_amount) }}</td>
+                <td class="text-right">{{ format_amount(row.gross_amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- =========================================================
+     6. AMOUNT IN WORDS
+     ========================================================= -->
+<div class="words-box section">
+    <div>
+        <span class="label-field">Słownie / In words:</span>
+    </div>
+    <div class="bold">{{ amount_words_pl }}</div>
+    <div class="bold" style="color: #555;">{{ amount_words_en }}</div>
+</div>
+
+<!-- =========================================================
+     7. ANNOTATIONS
+     ========================================================= -->
+{% if annotation_lines %}
+<div class="section">
+    <div class="section-title">Adnotacje / Annotations</div>
+    {% for line in annotation_lines %}
+    <div style="font-size: 10px; padding: 6px 0;">{{ line }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- =========================================================
+     8. PAYMENT: status, method, terms
+     ========================================================= -->
+<div class="section">
+    <div class="section-title">Płatność / Payment</div>
+    <div class="label-field">
+        Informacja o płatności / Payment status:
+        <span style="color: #000;">{{ payment_status_pl }} / {{ payment_status_en }}</span>
+    </div>
+    <div class="label-field">
+        Forma płatności / Payment method:
+        <span style="color: #000;">{{ payment_form_pl }} / {{ payment_form_en }}</span>
+    </div>
+    {% if invoice.payment.terms %}
+    <div class="payment-terms-box">
+        <div class="label-field" style="margin-bottom: 2px;">Opis płatności / Payment terms:</div>
+        <div style="font-size: 10px;">
+            {{ invoice.payment.terms.quantity }} {{ invoice.payment.terms.unit }}
+            {% if invoice.payment.terms.starting_event %}
+            {{ invoice.payment.terms.starting_event }}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- =========================================================
+     9. BANK ACCOUNT
+     ========================================================= -->
+{% if invoice.payment.bank_account %}
+<div class="section">
+    <div class="section-title">Numer rachunku bankowego / Bank Account Number</div>
+    <table class="bank">
+        {% if invoice.payment.bank_account.iban %}
+        <tr>
+            <td class="label">Pełny numer rachunku<br /><span style="color: #888; font-weight: normal;">Account number (IBAN)</span></td>
+            <td>{{ invoice.payment.bank_account.iban }}</td>
+        </tr>
+        {% endif %}
+        {% if invoice.payment.bank_account.swift %}
+        <tr>
+            <td class="label">Kod SWIFT<br /><span style="color: #888; font-weight: normal;">SWIFT code</span></td>
+            <td>{{ invoice.payment.bank_account.swift }}</td>
+        </tr>
+        {% endif %}
+        {% if invoice.payment.bank_account.bank_name %}
+        <tr>
+            <td class="label">Nazwa banku<br /><span style="color: #888; font-weight: normal;">Bank name</span></td>
+            <td>{{ invoice.payment.bank_account.bank_name }}</td>
+        </tr>
+        {% endif %}
+        {% if invoice.payment.bank_account.description %}
+        <tr>
+            <td class="label">Opis rachunku<br /><span style="color: #888; font-weight: normal;">Account description</span></td>
+            <td>{{ invoice.payment.bank_account.description }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+{% endif %}
+
+<!-- =========================================================
+     10. FOOTNOTES (tax rate explanations)
+     ========================================================= -->
+{% if footnotes %}
+<div class="footnotes">
+    {% for note in footnotes %}
+    <div>*{{ note }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- =========================================================
+     11. QR CODE / VERIFICATION
+     ========================================================= -->
+<div class="qr-section">
+    <div class="qr-header">
+        Sprawdź, czy Twoja faktura znajduje się w KSeF!<br />
+        <span style="font-size: 10px; font-weight: normal; color: #555;">Check if your invoice is registered in KSeF!</span>
+    </div>
+    <div class="qr-content">
+        <div class="qr-image">
+            <img src="{{ qr_image }}" alt="QR kod weryfikacyjny KSeF" />
+        </div>
+        <div>
+            <div style="font-size: 10px; color: #555; font-weight: bold; margin-bottom: 6px;">
+                Nie możesz zeskanować kodu z obrazka? Kliknij w link weryfikacyjny i przejdź do weryfikacji faktury!<br />
+                <span style="font-weight: normal; color: #999;">Can't scan the QR code? Click the verification link below to verify this invoice!</span>
+            </div>
+            <div class="label-field" style="margin-bottom: 2px;">Link weryfikacyjny / Verification link:</div>
+            <div class="qr-link" style="margin-bottom: 8px;">{{ qr_url }}</div>
+            {% if invoice.ksef_number %}
+            <div style="font-size: 10px;">
+                <strong>Nr KSeF / KSeF Number:</strong> {{ invoice.ksef_number }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
