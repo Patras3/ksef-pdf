@@ -32,8 +32,8 @@ const styles: StyleDictionary = {
   labelEn: { fontSize: 7, color: COLOR_LABEL_EN },
   bold: { bold: true, color: "#000" },
   totalAmount: { fontSize: 11, bold: true },
-  qrHeader: { fontSize: 9, bold: true, color: COLOR_QR_GREEN },
-  qrLink: { fontSize: 8, color: COLOR_LINK },
+  qrHeader: { fontSize: 8.5, bold: true, color: COLOR_QR_GREEN },
+  qrLink: { fontSize: 7, color: COLOR_LINK },
   footnote: { fontSize: 7, color: COLOR_SUBDUED_TEXT },
   italic: { italics: true },
   enHead: { color: COLOR_LABEL_MUTED, italics: false },
@@ -249,22 +249,33 @@ function buildDetailsBox(ctx: RenderContext): Content {
     },
   ];
   if (invoice.exchange_rate) {
-    leftStack.push({
-      text: [
-        { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
-        { text: ctx.exchange_rate_formatted, color: "#000" },
-      ],
-    });
     if (ctx.exchange_rate_is_global) {
-      leftStack.push(
-        {
-          text: "Kurs waluty wspólny dla wszystkich wierszy faktury",
-          style: "labelEn",
-          italics: true,
-          margin: [0, 1, 0, 0],
-        },
-        { text: "Exchange rate common for all invoice lines", style: "labelEn", italics: true },
-      );
+      leftStack.push({
+        columns: [
+          {
+            width: "auto",
+            text: [
+              { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
+              { text: ctx.exchange_rate_formatted, color: "#000" },
+            ],
+          },
+          {
+            width: "*",
+            stack: [
+              { text: "wspólny dla wszystkich wierszy faktury", style: "labelEn", italics: true },
+              { text: "common for all invoice lines", style: "labelEn", italics: true },
+            ],
+            margin: [8, 0, 0, 0],
+          },
+        ],
+      });
+    } else {
+      leftStack.push({
+        text: [
+          { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
+          { text: ctx.exchange_rate_formatted, color: "#000" },
+        ],
+      });
     }
   }
 
@@ -504,27 +515,28 @@ function buildAnnotations(ctx: RenderContext): Content | null {
   };
 }
 
-function buildPayment(ctx: RenderContext): Content {
+function buildPaymentBlock(ctx: RenderContext): Content {
   const { invoice } = ctx;
-  const stack: Content[] = [
-    { text: "Płatność / Payment", style: "sectionTitle" },
-    {
-      text: [
-        { text: "Informacja o płatności / Payment status: ", style: "labelField" },
-        { text: `${ctx.payment_status_pl} / ${ctx.payment_status_en}`, color: "#000" },
-      ],
-    },
-    {
-      text: [
-        { text: "Forma płatności / Payment method: ", style: "labelField" },
-        { text: `${ctx.payment_form_pl} / ${ctx.payment_form_en}`, color: "#000" },
-      ],
-    },
-  ];
 
+  // Column 1: status + forma
+  const statusCol: Content = {
+    stack: [
+      { text: "Informacja o płatności / Payment status:", style: "labelField" },
+      {
+        text: `${ctx.payment_status_pl} / ${ctx.payment_status_en}`,
+        color: "#000",
+        margin: [0, 0, 0, 3],
+      },
+      { text: "Forma płatności / Payment method:", style: "labelField" },
+      { text: `${ctx.payment_form_pl} / ${ctx.payment_form_en}`, color: "#000" },
+    ],
+  };
+
+  // Column 2: terms (Opis płatności)
+  let termsCol: Content;
   if (invoice.payment.terms) {
     const t = invoice.payment.terms;
-    stack.push({
+    termsCol = {
       table: {
         widths: ["*"],
         body: [
@@ -536,7 +548,7 @@ function buildPayment(ctx: RenderContext): Content {
                   text:
                     `${t.quantity} ${t.unit}` +
                     (t.starting_event ? ` ${t.starting_event}` : ""),
-                  fontSize: 8,
+                  fontSize: 7,
                   margin: [0, 1, 0, 0],
                 },
               ],
@@ -546,53 +558,66 @@ function buildPayment(ctx: RenderContext): Content {
         ],
       },
       layout: "noBorders",
-      margin: [0, 4, 0, 0],
-    });
+    };
+  } else {
+    termsCol = { text: "" };
   }
 
-  return { unbreakable: true, stack, margin: [0, 0, 0, 4] };
-}
-
-function buildBankAccount(ctx: RenderContext): Content | null {
-  const acc = ctx.invoice.payment.bank_account;
-  if (!acc) return null;
-
-  const rows: Content[][] = [];
-  const labelCell = (pl: string, en: string): Content => ({
-    stack: [
-      { text: pl, bold: true, fontSize: 7 },
-      { text: en, fontSize: 6.5, color: COLOR_LABEL_MUTED },
-    ],
-    fillColor: COLOR_TABLE_HEAD_BG,
-  });
-  if (acc.iban)
-    rows.push([labelCell("Pełny numer rachunku", "Account number (IBAN)"), { text: acc.iban, fontSize: 7.5 }]);
-  if (acc.swift) rows.push([labelCell("Kod SWIFT", "SWIFT code"), { text: acc.swift, fontSize: 7.5 }]);
-  if (acc.bank_name) rows.push([labelCell("Nazwa banku", "Bank name"), { text: acc.bank_name, fontSize: 7.5 }]);
-  if (acc.description)
-    rows.push([labelCell("Opis rachunku", "Account description"), { text: acc.description, fontSize: 7.5 }]);
-
-  if (rows.length === 0) return null;
+  // Column 3: bank account
+  const acc = invoice.payment.bank_account;
+  let bankCol: Content;
+  if (acc) {
+    const rows: Content[][] = [];
+    const labelCell = (pl: string, en: string): Content => ({
+      stack: [
+        { text: pl, bold: true, fontSize: 6.5 },
+        { text: en, fontSize: 6, color: COLOR_LABEL_MUTED },
+      ],
+      fillColor: COLOR_TABLE_HEAD_BG,
+    });
+    if (acc.iban)
+      rows.push([labelCell("Pełny nr rachunku", "Account number (IBAN)"), { text: acc.iban, fontSize: 7 }]);
+    if (acc.swift) rows.push([labelCell("Kod SWIFT", "SWIFT code"), { text: acc.swift, fontSize: 7 }]);
+    if (acc.bank_name) rows.push([labelCell("Nazwa banku", "Bank name"), { text: acc.bank_name, fontSize: 7 }]);
+    if (acc.description)
+      rows.push([labelCell("Opis rachunku", "Account description"), { text: acc.description, fontSize: 7 }]);
+    bankCol =
+      rows.length > 0
+        ? {
+            stack: [
+              { text: "Numer rachunku bankowego / Bank Account Number", style: "labelField", bold: true, color: COLOR_PRIMARY },
+              {
+                table: {
+                  dontBreakRows: true,
+                  widths: [70, "*"],
+                  body: rows,
+                },
+                layout: {
+                  hLineWidth: () => 0.5,
+                  vLineWidth: () => 0.5,
+                  hLineColor: () => COLOR_TABLE_BORDER,
+                  vLineColor: () => COLOR_TABLE_BORDER,
+                  paddingLeft: () => 4,
+                  paddingRight: () => 4,
+                  paddingTop: () => 1.5,
+                  paddingBottom: () => 1.5,
+                },
+                margin: [0, 1, 0, 0],
+              },
+            ],
+          }
+        : { text: "" };
+  } else {
+    bankCol = { text: "" };
+  }
 
   return {
+    unbreakable: true,
     stack: [
-      { text: "Numer rachunku bankowego / Bank Account Number", style: "sectionTitle" },
+      { text: "Płatność / Payment", style: "sectionTitle" },
       {
-        table: {
-          dontBreakRows: true,
-          widths: [120, "*"],
-          body: rows,
-        },
-        layout: {
-          hLineWidth: () => 0.5,
-          vLineWidth: () => 0.5,
-          hLineColor: () => COLOR_TABLE_BORDER,
-          vLineColor: () => COLOR_TABLE_BORDER,
-          paddingLeft: () => 5,
-          paddingRight: () => 5,
-          paddingTop: () => 2,
-          paddingBottom: () => 2,
-        },
+        columns: [statusCol, termsCol, bankCol],
+        columnGap: 10,
       },
     ],
     margin: [0, 0, 0, 4],
@@ -637,19 +662,18 @@ function buildQrSection(ctx: RenderContext): Content {
 
   const rightStack: Content[] = [
     {
-      text: "Nie możesz zeskanować kodu z obrazka? Kliknij w link weryfikacyjny i przejdź do weryfikacji faktury!",
-      fontSize: 8,
-      bold: true,
-      color: COLOR_SUBDUED_TEXT,
+      text: [
+        { text: "Sprawdź, czy Twoja faktura znajduje się w KSeF!", style: "qrHeader" },
+      ],
     },
     {
-      text: "Can't scan the QR code? Click the verification link below to verify this invoice!",
-      fontSize: 8,
-      color: COLOR_LABEL_EN,
-      margin: [0, 1, 0, 5],
+      text: "Check if your invoice is registered in KSeF!",
+      fontSize: 7,
+      color: COLOR_SUBDUED_TEXT,
+      margin: [0, 0, 0, 3],
     },
     { text: "Link weryfikacyjny / Verification link:", style: "labelField" },
-    { text: ctx.qr_url, link: ctx.qr_url, style: "qrLink", margin: [0, 1, 0, 6] },
+    { text: ctx.qr_url, link: ctx.qr_url, style: "qrLink", margin: [0, 0, 0, 2] },
   ];
   if (invoice.ksef_number) {
     rightStack.push({
@@ -657,35 +681,23 @@ function buildQrSection(ctx: RenderContext): Content {
         { text: "Nr KSeF / KSeF Number: ", bold: true },
         { text: invoice.ksef_number },
       ],
-      fontSize: 8,
+      fontSize: 7,
     });
   }
 
   return {
     unbreakable: true,
     stack: [
-      // Top accent rule
       {
-        canvas: [{ type: "line", x1: 0, y1: 0, x2: mm(184), y2: 0, lineWidth: 1.5, lineColor: COLOR_PRIMARY }],
-        margin: [0, 0, 0, 4],
-      },
-      {
-        stack: [
-          { text: "Sprawdź, czy Twoja faktura znajduje się w KSeF!", style: "qrHeader" },
-          {
-            text: "Check if your invoice is registered in KSeF!",
-            fontSize: 8,
-            color: COLOR_SUBDUED_TEXT,
-            margin: [0, 1, 0, 8],
-          },
-        ],
+        canvas: [{ type: "line", x1: 0, y1: 0, x2: mm(184), y2: 0, lineWidth: 1, lineColor: COLOR_PRIMARY }],
+        margin: [0, 0, 0, 3],
       },
       {
         columns: [
-          { image: ctx.qr_image, width: mm(46), height: mm(46) },
+          { image: ctx.qr_image, width: mm(28), height: mm(28) },
           { stack: rightStack },
         ],
-        columnGap: 12,
+        columnGap: 10,
       },
     ],
   };
@@ -707,9 +719,7 @@ export function buildDocDefinition(ctx: RenderContext): TDocumentDefinitions {
   content.push(buildAmountInWords(ctx));
   const annotations = buildAnnotations(ctx);
   if (annotations) content.push(annotations);
-  content.push(buildPayment(ctx));
-  const bank = buildBankAccount(ctx);
-  if (bank) content.push(bank);
+  content.push(buildPaymentBlock(ctx));
   const footnotes = buildFootnotes(ctx);
   if (footnotes) content.push(footnotes);
   content.push(buildQrSection(ctx));
