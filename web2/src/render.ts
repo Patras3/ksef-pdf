@@ -90,16 +90,16 @@ export function renderInvoice(ctx: RenderContext): string {
   const taxSummaryBlock =
     invoice.tax_summary.length > 0
       ? `
-        <div class="section">
-          <div class="section-title">Podsumowanie stawek podatku / VAT Tax Summary</div>
-          <table class="items">
+        <div class="section tax-summary-compact">
+          <div class="section-subtitle">Podsumowanie stawek podatku / VAT Tax Summary</div>
+          <table class="items compact">
             <thead>
               <tr>
-                <th style="width:25px;">Lp.<br /><span class="en">No</span></th>
+                <th style="width:22px;">Lp.<br /><span class="en">No</span></th>
                 <th style="text-align: left;">Stawka podatku<br /><span class="en">Tax rate</span></th>
-                <th style="width:90px;">Kwota netto<br /><span class="en">Net amount</span></th>
-                <th style="width:80px;">Kwota podatku<br /><span class="en">Tax amount</span></th>
-                <th style="width:90px;">Kwota brutto<br /><span class="en">Gross amount</span></th>
+                <th style="width:80px;">Kwota netto<br /><span class="en">Net amount</span></th>
+                <th style="width:75px;">Kwota podatku<br /><span class="en">Tax amount</span></th>
+                <th style="width:80px;">Kwota brutto<br /><span class="en">Gross amount</span></th>
               </tr>
             </thead>
             <tbody>
@@ -113,7 +113,7 @@ export function renderInvoice(ctx: RenderContext): string {
                   return `
                     <tr>
                       <td class="text-center">${i + 1}</td>
-                      <td style="font-size: 9px;">${labelHtml}</td>
+                      <td>${labelHtml}</td>
                       <td class="text-right">${escape(row.net_amount_fmt)}</td>
                       <td class="text-right">${escape(row.tax_amount_fmt)}</td>
                       <td class="text-right">${escape(row.gross_amount_fmt)}</td>

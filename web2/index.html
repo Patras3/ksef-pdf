@@ -20,7 +20,7 @@
       </div>
 
       <div class="form-row">
-        <label for="ksef-id">Numer KSeF (opcjonalnie):</label>
+        <label for="ksef-id">Numer KSeF:</label>
         <input
           id="ksef-id"
           type="text"
@@ -34,6 +34,13 @@
       </div>
 
       <div id="status-msg" class="status-msg" hidden></div>
+
+      <div class="form-actions" id="form-actions" hidden>
+        <button id="generate-btn" type="button" class="primary">Generuj fakturę</button>
+        <button id="skip-ksef-btn" type="button" class="secondary">
+          Generuj bez numeru KSeF
+        </button>
+      </div>
     </div>
 
     <div id="invoice-root" hidden></div>

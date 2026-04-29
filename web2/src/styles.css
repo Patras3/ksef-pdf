@@ -131,6 +131,17 @@ table.items td {
     padding: 3px 2px;
 }
 
+table.items.compact { font-size: 7.5px; }
+table.items.compact th,
+table.items.compact td { padding: 1.5px 2px; }
+.section-subtitle {
+    font-weight: bold;
+    font-size: 9px;
+    color: #1a5276;
+    margin-bottom: 1px;
+}
+.tax-summary-compact { margin-top: 4px; }
+
 .text-right { text-align: right; }
 .text-center { text-align: center; }
 

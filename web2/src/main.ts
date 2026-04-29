@@ -6,14 +6,20 @@ import type { RenderContext } from "./types";
 const xmlFileInput = document.getElementById("xml-file") as HTMLInputElement;
 const ksefIdInput = document.getElementById("ksef-id") as HTMLInputElement;
 const statusMsg = document.getElementById("status-msg") as HTMLDivElement;
+const formActions = document.getElementById("form-actions") as HTMLDivElement;
+const generateBtn = document.getElementById("generate-btn") as HTMLButtonElement;
+const skipKsefBtn = document.getElementById("skip-ksef-btn") as HTMLButtonElement;
 const uploadPanel = document.getElementById("upload-panel") as HTMLDivElement;
 const invoiceRoot = document.getElementById("invoice-root") as HTMLDivElement;
 const pdfBtn = document.getElementById("pdf-btn") as HTMLButtonElement;
 const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
 
+let pendingFile: File | null = null;
 let currentContext: RenderContext | null = null;
 
-function showStatus(msg: string, kind: "error" | "info" = "error") {
+const KSEF_REGEX = /^\d{10}-\d{8}-[A-Z0-9]{12}-\d{2}$/;
+
+function showStatus(msg: string, kind: "error" | "info" | "warn" = "error") {
   statusMsg.textContent = msg;
   statusMsg.className = `status-msg ${kind}`;
   statusMsg.hidden = false;
@@ -26,12 +32,46 @@ function clearStatus() {
 xmlFileInput.addEventListener("change", () => {
   const file = xmlFileInput.files?.[0];
   if (!file) return;
-  // Auto-fill KSeF ID from filename if pattern matches and field is empty
+  clearStatus();
+
   const detected = ksefNumberFromFilename(file.name);
-  if (detected && !ksefIdInput.value) {
-    ksefIdInput.value = detected;
+  if (detected) {
+    if (!ksefIdInput.value) ksefIdInput.value = detected;
+    void loadFile(file);
+  } else {
+    // Filename doesn't match — require user to either type the KSeF ID or
+    // explicitly skip it. Don't render until they choose.
+    pendingFile = file;
+    showStatus(
+      'Nazwa pliku nie zawiera numeru KSeF. Wpisz go ręcznie albo kliknij ' +
+        '"Generuj bez numeru KSeF" jeśli faktura nie była wysłana do KSeF.',
+      "warn",
+    );
+    formActions.hidden = false;
+    updateGenerateButton();
+    ksefIdInput.focus();
   }
-  void loadFile(file);
+});
+
+function updateGenerateButton() {
+  const value = ksefIdInput.value.trim();
+  generateBtn.disabled = value.length === 0;
+  generateBtn.textContent = KSEF_REGEX.test(value) || value.length === 0
+    ? "Generuj fakturę"
+    : "Generuj (numer ma nietypowy format)";
+}
+
+ksefIdInput.addEventListener("input", updateGenerateButton);
+
+generateBtn.addEventListener("click", () => {
+  if (!pendingFile) return;
+  void loadFile(pendingFile);
+});
+
+skipKsefBtn.addEventListener("click", () => {
+  if (!pendingFile) return;
+  ksefIdInput.value = "";
+  void loadFile(pendingFile);
 });
 
 async function loadFile(file: File) {
@@ -45,6 +85,7 @@ async function loadFile(file: File) {
     invoiceRoot.innerHTML = renderInvoice(ctx);
     document.title = `Faktura ${ctx.invoice.invoice_number}`;
     currentContext = ctx;
+    pendingFile = null;
 
     uploadPanel.hidden = true;
     invoiceRoot.hidden = false;
@@ -58,11 +99,13 @@ async function loadFile(file: File) {
 
 resetBtn.addEventListener("click", () => {
   currentContext = null;
+  pendingFile = null;
   uploadPanel.hidden = false;
   invoiceRoot.hidden = true;
   invoiceRoot.innerHTML = "";
   pdfBtn.hidden = true;
   resetBtn.hidden = true;
+  formActions.hidden = true;
   xmlFileInput.value = "";
   ksefIdInput.value = "";
   clearStatus();

@@ -81,6 +81,39 @@ body {
     border: 1px solid #aed6f1;
     color: #1b4f72;
 }
+.status-msg.warn {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.form-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.form-actions button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+}
+.form-actions button.primary {
+    background: #27ae60;
+    color: white;
+}
+.form-actions button.primary:hover { background: #1f8c4d; }
+.form-actions button.primary:disabled { background: #888; cursor: not-allowed; }
+.form-actions button.secondary {
+    background: white;
+    color: #6c757d;
+    border: 1px solid #bdc3c7;
+}
+.form-actions button.secondary:hover { background: #f8f9fa; }
 
 #invoice-root {
     background: white;

@@ -408,8 +408,8 @@ function buildTaxSummary(ctx: RenderContext): Content | null {
 
   const headerCell = (pl: string, en: string, alignment: "left" | "center" = "center"): Content => ({
     stack: [
-      { text: pl, alignment, fontSize: 7, bold: true },
-      { text: en, alignment, fontSize: 6.5, color: COLOR_LABEL_MUTED },
+      { text: pl, alignment, fontSize: 6.5, bold: true },
+      { text: en, alignment, fontSize: 6, color: COLOR_LABEL_MUTED },
     ],
     fillColor: COLOR_TABLE_HEAD_BG,
   });
@@ -428,30 +428,37 @@ function buildTaxSummary(ctx: RenderContext): Content | null {
     const parts = row.label.split("\n");
     const labelStack: Content = {
       stack: [
-        { text: parts[0] ?? "", fontSize: 7.5 },
+        { text: parts[0] ?? "", fontSize: 6.5 },
         ...(parts.length > 1
-          ? [{ text: parts[1] ?? "", fontSize: 6.5, color: COLOR_LABEL_MUTED }]
+          ? [{ text: parts[1] ?? "", fontSize: 6, color: COLOR_LABEL_MUTED }]
           : []),
       ],
     };
     body.push([
-      { text: String(i + 1), alignment: "center", fontSize: 7 },
+      { text: String(i + 1), alignment: "center", fontSize: 6.5 },
       labelStack,
-      { text: row.net_amount_fmt, alignment: "right", fontSize: 7 },
-      { text: row.tax_amount_fmt, alignment: "right", fontSize: 7 },
-      { text: row.gross_amount_fmt, alignment: "right", fontSize: 7 },
+      { text: row.net_amount_fmt, alignment: "right", fontSize: 6.5 },
+      { text: row.tax_amount_fmt, alignment: "right", fontSize: 6.5 },
+      { text: row.gross_amount_fmt, alignment: "right", fontSize: 6.5 },
     ]);
   });
 
   return {
     unbreakable: true,
     stack: [
-      { text: "Podsumowanie stawek podatku / VAT Tax Summary", style: "sectionTitle" },
+      {
+        text: "Podsumowanie stawek podatku / VAT Tax Summary",
+        style: "labelField",
+        bold: true,
+        color: COLOR_PRIMARY,
+        fontSize: 8,
+        margin: [0, 0, 0, 1],
+      },
       {
         table: {
           headerRows: 1,
           dontBreakRows: true,
-          widths: [18, "*", 65, 60, 65],
+          widths: [16, "*", 60, 55, 60],
           body,
         },
         layout: {
@@ -461,8 +468,8 @@ function buildTaxSummary(ctx: RenderContext): Content | null {
           vLineColor: () => COLOR_TABLE_BORDER,
           paddingLeft: () => 3,
           paddingRight: () => 3,
-          paddingTop: () => 2,
-          paddingBottom: () => 2,
+          paddingTop: () => 1.5,
+          paddingBottom: () => 1.5,
         },
       },
     ],
