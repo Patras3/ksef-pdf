@@ -662,7 +662,6 @@ function buildQrSection(ctx: RenderContext): Content {
   }
 
   return {
-    pageBreak: "before",
     unbreakable: true,
     stack: [
       // Top accent rule
