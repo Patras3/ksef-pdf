@@ -689,6 +689,17 @@ function buildQrSection(ctx: RenderContext): Content {
       ],
       fontSize: 7,
     });
+  } else {
+    // Spec KSeF 2.0: pod kodem QR umieszczany jest numer KSeF lub "OFFLINE"
+    // jeśli nie został jeszcze nadany.
+    rightStack.push({
+      text: [
+        { text: "Nr KSeF / KSeF Number: ", bold: true },
+        { text: "OFFLINE", color: COLOR_PRIMARY_E, bold: true },
+        { text: " (faktura niewysłana do KSeF / not yet registered)", color: COLOR_SUBDUED_TEXT },
+      ],
+      fontSize: 7,
+    });
   }
 
   return {

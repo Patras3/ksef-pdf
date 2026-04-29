@@ -179,11 +179,16 @@ export function renderInvoice(ctx: RenderContext): string {
          </div>`
       : "";
 
+  // Spec KSeF 2.0: pod QR jest numer KSeF lub "OFFLINE" gdy go nie ma.
   const ksefInQr = invoice.ksef_number
     ? `<div style="font-size: 10px;">
          <strong>Nr KSeF / KSeF Number:</strong> ${escape(invoice.ksef_number)}
        </div>`
-    : "";
+    : `<div style="font-size: 10px;">
+         <strong>Nr KSeF / KSeF Number:</strong>
+         <span style="color: #c0392b; font-weight: bold;">OFFLINE</span>
+         <span style="color: #555;">(faktura niewysłana do KSeF / not yet registered)</span>
+       </div>`;
 
   return `
 <div class="header">
