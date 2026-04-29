@@ -4,6 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "build:fonts": "node scripts/extract-fonts.mjs",
+    "predev": "npm run build:fonts",
+    "prebuild": "npm run build:fonts",
+    "postinstall": "npm run build:fonts",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"

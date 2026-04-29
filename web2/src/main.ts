@@ -3,8 +3,6 @@ import { renderInvoice } from "./render";
 
 const root = document.getElementById("invoice-root");
 if (root) {
-  // HTML preview — pixel-precise screen view to compare layout with web/.
-  // Nie wpływa na finalny PDF — pdfmake renderuje wektorowo z DocDefinition.
   const note = document.createElement("div");
   note.className = "preview-note";
   note.textContent =
@@ -20,17 +18,13 @@ pdfBtn?.addEventListener("click", async () => {
   const original = pdfBtn.textContent;
   pdfBtn.textContent = "Generowanie...";
   try {
-    const [pdfMakeModule, vfsModule, { buildDocDefinition }] = await Promise.all([
+    const [pdfMakeModule, fontsModule, { buildDocDefinition }] = await Promise.all([
       import("pdfmake/build/pdfmake"),
-      import("pdfmake/build/vfs_fonts"),
+      import("./fonts.generated"),
       import("./render-pdf"),
     ]);
     const pdfMake = (pdfMakeModule as { default?: unknown }).default ?? pdfMakeModule;
-    const vfs =
-      (vfsModule as { default?: { vfs?: unknown; pdfMake?: { vfs: unknown } } }).default ??
-      (vfsModule as unknown);
-    const vfsObj = (vfs as { pdfMake?: { vfs: unknown } }).pdfMake?.vfs ?? (vfs as { vfs?: unknown }).vfs;
-    (pdfMake as { vfs: unknown }).vfs = vfsObj;
+    (pdfMake as { vfs: unknown }).vfs = fontsModule.vfs;
 
     const filename = `Faktura_${mockContext.invoice.invoice_number.replace(/\//g, "_")}.pdf`;
     (pdfMake as { createPdf: (def: unknown) => { download: (n: string) => void } })
