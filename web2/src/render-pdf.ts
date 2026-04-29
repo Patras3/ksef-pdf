@@ -1,4 +1,4 @@
-import type { Content, ContentTable, StyleDictionary, TDocumentDefinitions } from "pdfmake/interfaces";
+import type { Column, Content, ContentTable, StyleDictionary, TDocumentDefinitions } from "pdfmake/interfaces";
 
 import type { RenderContext } from "./types";
 
@@ -233,55 +233,18 @@ function buildParties(ctx: RenderContext): Content {
 function buildDetailsBox(ctx: RenderContext): Content {
   const { invoice } = ctx;
 
-  const leftStack: Content[] = [
+  // Top row: invoice date | sale date (2-col grid)
+  const dateLeft: Content[] = [
     {
       text: "Data wystawienia, z zastrzeżeniem art. 106na ust. 1 ustawy:",
       style: "labelField",
     },
     { text: "Invoice date:", style: "labelEn" },
     { text: formatDate(invoice.invoice_date), bold: true, fontSize: 8.5, margin: [0, 1, 0, 0] },
-    {
-      text: [
-        { text: "Kod waluty / Currency code: ", style: "labelField" },
-        { text: invoice.currency, bold: true, color: "#000" },
-      ],
-      margin: [0, 6, 0, 0],
-    },
   ];
-  if (invoice.exchange_rate) {
-    if (ctx.exchange_rate_is_global) {
-      leftStack.push({
-        columns: [
-          {
-            width: "auto",
-            text: [
-              { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
-              { text: ctx.exchange_rate_formatted, color: "#000" },
-            ],
-          },
-          {
-            width: "*",
-            stack: [
-              { text: "wspólny dla wszystkich wierszy faktury", style: "labelEn", italics: true },
-              { text: "common for all invoice lines", style: "labelEn", italics: true },
-            ],
-            margin: [8, 0, 0, 0],
-          },
-        ],
-      });
-    } else {
-      leftStack.push({
-        text: [
-          { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
-          { text: ctx.exchange_rate_formatted, color: "#000" },
-        ],
-      });
-    }
-  }
-
-  const rightStack: Content[] = [];
+  const dateRight: Content[] = [];
   if (invoice.sale_date) {
-    rightStack.push(
+    dateRight.push(
       {
         text: "Data dokonania lub zakończenia dostawy towarów lub wykonania usługi:",
         style: "labelField",
@@ -289,6 +252,37 @@ function buildDetailsBox(ctx: RenderContext): Content {
       { text: "Date of supply / service completion:", style: "labelEn" },
       { text: formatDate(invoice.sale_date), bold: true, fontSize: 8.5, margin: [0, 1, 0, 0] },
     );
+  }
+
+  // Bottom row: currency + exchange rate + (optional) italic note — full width
+  const currencyRow: Column[] = [
+    {
+      width: "auto",
+      text: [
+        { text: "Kod waluty / Currency code: ", style: "labelField" },
+        { text: invoice.currency, bold: true, color: "#000" },
+      ],
+    },
+  ];
+  if (invoice.exchange_rate) {
+    currencyRow.push({
+      width: "auto",
+      text: [
+        { text: "Kurs waluty / Exchange rate: ", style: "labelField" },
+        { text: ctx.exchange_rate_formatted, color: "#000" },
+      ],
+      margin: [16, 0, 0, 0],
+    });
+    if (ctx.exchange_rate_is_global) {
+      currencyRow.push({
+        width: "*",
+        stack: [
+          { text: "wspólny dla wszystkich wierszy faktury", style: "labelEn", italics: true },
+          { text: "common for all invoice lines", style: "labelEn", italics: true },
+        ],
+        margin: [10, 0, 0, 0],
+      });
+    }
   }
 
   return {
@@ -300,8 +294,12 @@ function buildDetailsBox(ctx: RenderContext): Content {
             stack: [
               { text: "Szczegóły / Details", style: "sectionTitle" },
               {
-                columns: [{ stack: leftStack }, { stack: rightStack }],
+                columns: [{ stack: dateLeft }, { stack: dateRight }],
                 columnGap: 12,
+              },
+              {
+                columns: currencyRow,
+                margin: [0, 6, 0, 0],
               },
             ],
           },

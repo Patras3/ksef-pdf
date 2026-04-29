@@ -51,17 +51,20 @@ export function renderInvoice(ctx: RenderContext): string {
         <div style="font-size: 10px; font-weight: bold;">${escape(invoice.ksef_number)}</div>`
     : "";
 
-  const exchangeBlock = invoice.exchange_rate
-    ? ctx.exchange_rate_is_global
-      ? `<div style="display: flex; gap: 10px; align-items: flex-start;">
-           <div class="label-field" style="white-space: nowrap;">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>
-           <div>
-             <div class="label-en" style="font-style: italic;">wspólny dla wszystkich wierszy faktury</div>
-             <div class="label-en" style="font-style: italic;">common for all invoice lines</div>
-           </div>
-         </div>`
-      : `<div class="label-field">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>`
-    : "";
+  const currencyRow = invoice.exchange_rate
+    ? `<div style="display: flex; gap: 14px; align-items: flex-start; margin-top: 6px; flex-wrap: wrap;">
+         <div class="label-field" style="white-space: nowrap;">Kod waluty / Currency code: <span style="color: #000; font-weight: bold;">${escape(invoice.currency)}</span></div>
+         <div class="label-field" style="white-space: nowrap;">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>
+         ${
+           ctx.exchange_rate_is_global
+             ? `<div style="flex: 1 1 auto; min-width: 0;">
+                  <div class="label-en" style="font-style: italic;">wspólny dla wszystkich wierszy faktury</div>
+                  <div class="label-en" style="font-style: italic;">common for all invoice lines</div>
+                </div>`
+             : ""
+         }
+       </div>`
+    : `<div class="label-field" style="margin-top: 6px;">Kod waluty / Currency code: <span style="color: #000; font-weight: bold;">${escape(invoice.currency)}</span></div>`;
 
   const saleDateBlock = invoice.sale_date
     ? `<div class="label-field">Data dokonania lub zakończenia dostawy towarów lub wykonania usługi:</div>
@@ -233,15 +236,12 @@ export function renderInvoice(ctx: RenderContext): string {
       <div class="label-field">Data wystawienia, z zastrzeżeniem art. 106na ust. 1 ustawy:</div>
       <div class="label-en">Invoice date:</div>
       <div class="bold" style="margin-top: 2px;">${formatDate(invoice.invoice_date)}</div>
-      <div style="margin-top: 8px;">
-        <div class="label-field">Kod waluty / Currency code: <span style="color: #000; font-weight: bold;">${escape(invoice.currency)}</span></div>
-      </div>
-      ${exchangeBlock}
     </div>
     <div>
       ${saleDateBlock}
     </div>
   </div>
+  ${currencyRow}
 </div>
 
 <div class="section">
