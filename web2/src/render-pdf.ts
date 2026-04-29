@@ -27,7 +27,7 @@ const COLOR_LINK = "#2980b9";
 const styles: StyleDictionary = {
   headerTitle: { fontSize: 14, bold: true, color: COLOR_PRIMARY },
   invoiceNumber: { fontSize: 13, bold: true, color: COLOR_PRIMARY },
-  sectionTitle: { fontSize: 9, bold: true, color: COLOR_PRIMARY, margin: [0, 0, 0, 3] },
+  sectionTitle: { fontSize: 9, bold: true, color: COLOR_PRIMARY, margin: [0, 0, 0, 1] },
   labelField: { fontSize: 7, color: COLOR_LABEL },
   labelEn: { fontSize: 7, color: COLOR_LABEL_EN },
   bold: { bold: true, color: "#000" },
@@ -106,7 +106,7 @@ function buildHeader(ctx: RenderContext): Content {
       paddingTop: () => 0,
       paddingBottom: () => 4,
     },
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -226,7 +226,7 @@ function buildParties(ctx: RenderContext): Content {
       buildPartyStack("Nabywca / Buyer", buyerItems),
     ],
     columnGap: 12,
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -302,12 +302,12 @@ function buildDetailsBox(ctx: RenderContext): Content {
       vLineWidth: () => 0.5,
       hLineColor: () => COLOR_BOX_BORDER,
       vLineColor: () => COLOR_BOX_BORDER,
-      paddingLeft: () => 8,
-      paddingRight: () => 8,
-      paddingTop: () => 6,
-      paddingBottom: () => 6,
+      paddingLeft: () => 6,
+      paddingRight: () => 6,
+      paddingTop: () => 4,
+      paddingBottom: () => 4,
     },
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -348,6 +348,7 @@ function buildLineItemsTable(ctx: RenderContext): Content {
   const itemsTable: ContentTable = {
     table: {
       headerRows: 1,
+      keepWithHeaderRows: 1,
       widths: [18, "*", 55, 25, 45, 38, 60],
       body,
     },
@@ -358,8 +359,8 @@ function buildLineItemsTable(ctx: RenderContext): Content {
       vLineColor: () => COLOR_TABLE_BORDER,
       paddingLeft: () => 3,
       paddingRight: () => 3,
-      paddingTop: () => 3,
-      paddingBottom: () => 3,
+      paddingTop: () => 2,
+      paddingBottom: () => 2,
     },
     margin: [0, 0, 0, 4],
   };
@@ -388,7 +389,7 @@ function buildLineItemsTable(ctx: RenderContext): Content {
         margin: [0, 4, 0, 0],
       },
     ],
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -434,11 +435,13 @@ function buildTaxSummary(ctx: RenderContext): Content | null {
   });
 
   return {
+    unbreakable: true,
     stack: [
       { text: "Podsumowanie stawek podatku / VAT Tax Summary", style: "sectionTitle" },
       {
         table: {
           headerRows: 1,
+          dontBreakRows: true,
           widths: [18, "*", 65, 60, 65],
           body,
         },
@@ -449,40 +452,46 @@ function buildTaxSummary(ctx: RenderContext): Content | null {
           vLineColor: () => COLOR_TABLE_BORDER,
           paddingLeft: () => 3,
           paddingRight: () => 3,
-          paddingTop: () => 3,
-          paddingBottom: () => 3,
+          paddingTop: () => 2,
+          paddingBottom: () => 2,
         },
       },
     ],
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
 function buildAmountInWords(ctx: RenderContext): Content {
   return {
-    table: {
-      widths: ["*"],
-      body: [
-        [
-          {
-            stack: [
-              { text: "Słownie / In words:", style: "labelField" },
-              { text: ctx.amount_words_pl, bold: true, fontSize: 8 },
-              { text: ctx.amount_words_en, bold: true, fontSize: 8, color: COLOR_SUBDUED_TEXT },
+    unbreakable: true,
+    stack: [
+      {
+        table: {
+          widths: ["*"],
+          body: [
+            [
+              {
+                stack: [
+                  { text: "Słownie / In words:", style: "labelField" },
+                  { text: ctx.amount_words_pl, bold: true, fontSize: 8 },
+                  { text: ctx.amount_words_en, bold: true, fontSize: 8, color: COLOR_SUBDUED_TEXT },
+                ],
+                fillColor: COLOR_SOFT_BG,
+              },
             ],
-            fillColor: COLOR_SOFT_BG,
-          },
-        ],
-      ],
-    },
-    layout: "noBorders",
-    margin: [0, 0, 0, 8],
+          ],
+        },
+        layout: "noBorders",
+      },
+    ],
+    margin: [0, 0, 0, 4],
   };
 }
 
 function buildAnnotations(ctx: RenderContext): Content | null {
   if (ctx.annotation_lines.length === 0) return null;
   return {
+    unbreakable: true,
     stack: [
       { text: "Adnotacje / Annotations", style: "sectionTitle" },
       ...ctx.annotation_lines.map((line) => ({
@@ -491,7 +500,7 @@ function buildAnnotations(ctx: RenderContext): Content | null {
         margin: [0, 4, 0, 4] as [number, number, number, number],
       })),
     ],
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -541,7 +550,7 @@ function buildPayment(ctx: RenderContext): Content {
     });
   }
 
-  return { stack, margin: [0, 0, 0, 8] };
+  return { unbreakable: true, stack, margin: [0, 0, 0, 4] };
 }
 
 function buildBankAccount(ctx: RenderContext): Content | null {
@@ -570,6 +579,7 @@ function buildBankAccount(ctx: RenderContext): Content | null {
       { text: "Numer rachunku bankowego / Bank Account Number", style: "sectionTitle" },
       {
         table: {
+          dontBreakRows: true,
           widths: [120, "*"],
           body: rows,
         },
@@ -580,40 +590,45 @@ function buildBankAccount(ctx: RenderContext): Content | null {
           vLineColor: () => COLOR_TABLE_BORDER,
           paddingLeft: () => 5,
           paddingRight: () => 5,
-          paddingTop: () => 3,
-          paddingBottom: () => 3,
+          paddingTop: () => 2,
+          paddingBottom: () => 2,
         },
       },
     ],
-    margin: [0, 0, 0, 8],
+    margin: [0, 0, 0, 4],
   };
 }
 
 function buildFootnotes(ctx: RenderContext): Content | null {
   if (ctx.footnotes.length === 0) return null;
   return {
-    table: {
-      widths: ["*"],
-      body: [
-        [
-          {
-            stack: ctx.footnotes.map((n) => ({ text: `*${n}`, style: "footnote" })),
-            border: [false, true, false, false],
-            borderColor: [COLOR_BOX_BORDER, COLOR_BOX_BORDER, COLOR_BOX_BORDER, COLOR_BOX_BORDER],
-          },
-        ],
-      ],
-    },
-    layout: {
-      defaultBorder: false,
-      hLineWidth: (i: number) => (i === 0 ? 0.5 : 0),
-      hLineColor: () => COLOR_BOX_BORDER,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-      paddingTop: () => 4,
-      paddingBottom: () => 0,
-    },
-    margin: [0, 0, 0, 8],
+    unbreakable: true,
+    stack: [
+      {
+        table: {
+          widths: ["*"],
+          body: [
+            [
+              {
+                stack: ctx.footnotes.map((n) => ({ text: `*${n}`, style: "footnote" })),
+                border: [false, true, false, false],
+                borderColor: [COLOR_BOX_BORDER, COLOR_BOX_BORDER, COLOR_BOX_BORDER, COLOR_BOX_BORDER],
+              },
+            ],
+          ],
+        },
+        layout: {
+          defaultBorder: false,
+          hLineWidth: (i: number) => (i === 0 ? 0.5 : 0),
+          hLineColor: () => COLOR_BOX_BORDER,
+          paddingLeft: () => 0,
+          paddingRight: () => 0,
+          paddingTop: () => 2,
+          paddingBottom: () => 0,
+        },
+      },
+    ],
+    margin: [0, 0, 0, 4],
   };
 }
 
@@ -648,11 +663,12 @@ function buildQrSection(ctx: RenderContext): Content {
 
   return {
     pageBreak: "before",
+    unbreakable: true,
     stack: [
       // Top accent rule
       {
         canvas: [{ type: "line", x1: 0, y1: 0, x2: mm(184), y2: 0, lineWidth: 1.5, lineColor: COLOR_PRIMARY }],
-        margin: [0, 0, 0, 8],
+        margin: [0, 0, 0, 4],
       },
       {
         stack: [
@@ -702,7 +718,7 @@ export function buildDocDefinition(ctx: RenderContext): TDocumentDefinitions {
   return {
     pageSize: "A4",
     pageMargins: [mm(13), mm(12), mm(13), mm(16)],
-    defaultStyle: { fontSize: 7.5, color: "#000", lineHeight: 1.25 },
+    defaultStyle: { fontSize: 7, color: "#000", lineHeight: 1.15 },
     styles,
     info: {
       title: `Faktura ${ctx.invoice.invoice_number}`,
