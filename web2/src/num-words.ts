@@ -9,12 +9,13 @@
 import { toCardinal as toCardinalPL } from "n2words/pl-PL";
 import { toCardinal as toCardinalEN } from "n2words/en-GB";
 
-/** Polish noun forms: pick correct form based on number. */
+/** Polish noun forms: pick correct form based on number (uses absolute value). */
 function plForm(n: number, forms: [string, string, string]): string {
   const [form1, form2_4, form5] = forms;
-  if (n === 1) return form1;
-  const lastTwo = n % 100;
-  const lastOne = n % 10;
+  const absN = Math.abs(n);
+  if (absN === 1) return form1;
+  const lastTwo = absN % 100;
+  const lastOne = absN % 10;
   if (lastTwo >= 12 && lastTwo <= 14) return form5;
   if (lastOne >= 2 && lastOne <= 4) return form2_4;
   return form5;
@@ -38,13 +39,20 @@ const CURRENCIES: Record<string, CurrencySpec> = {
 export function amountInWords(amountStr: string, currency: string): [string, string] {
   const value = Number(amountStr);
   if (!Number.isFinite(value)) return ["", ""];
+
+  // Validate currency
+  const currencyCode = (currency || "").trim().toUpperCase();
+  if (!currencyCode) {
+    return ["", ""];
+  }
+
   const whole = Math.trunc(value);
   const cents = Math.round(Math.abs(value - whole) * 100);
 
   const plWords = toCardinalPL(whole);
   const enWords = toCardinalEN(whole);
 
-  const spec = CURRENCIES[currency.toUpperCase()];
+  const spec = CURRENCIES[currencyCode];
   if (spec) {
     const plCurrency = plForm(whole, spec.pl);
     const plResult = `${plWords} ${plCurrency} ${cents}/100`;
@@ -57,7 +65,7 @@ export function amountInWords(amountStr: string, currency: string): [string, str
   // Unknown currency: use ISO code as-is
   const enCentWords = toCardinalEN(cents);
   return [
-    `${plWords} ${currency} ${cents}/100`,
-    `${enWords} ${currency} and ${enCentWords} cents`,
+    `${plWords} ${currencyCode} ${cents}/100`,
+    `${enWords} ${currencyCode} and ${enCentWords} cents`,
   ];
 }

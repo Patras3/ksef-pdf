@@ -16,6 +16,16 @@ import { parseInvoiceXml } from "./parser";
 import { buildVerificationUrl, generateQrDataUrl } from "./qr";
 import type { Annotations, RenderContext } from "./types";
 
+export interface ValidationWarning {
+  field: string;
+  message: string;
+}
+
+export interface BuildResult {
+  context: RenderContext;
+  warnings: ValidationWarning[];
+}
+
 function buildAnnotationLines(a: Annotations): string[] {
   const out: string[] = [];
   if (a.reverse_charge) out.push("Odwrotne obciążenie / Reverse charge");
@@ -54,8 +64,30 @@ export async function buildContext(
   xmlString: string,
   xmlBytes: Uint8Array,
   ksefNumber: string,
-): Promise<RenderContext> {
+): Promise<BuildResult> {
+  const warnings: ValidationWarning[] = [];
   const invoice = parseInvoiceXml(xmlString, ksefNumber);
+
+  // Validate critical fields
+  if (!invoice.invoice_number) {
+    warnings.push({ field: "invoice_number", message: "Brak numeru faktury w pliku XML." });
+  }
+  if (!invoice.invoice_date) {
+    warnings.push({ field: "invoice_date", message: "Brak daty wystawienia faktury." });
+  }
+  if (!invoice.seller.nip && !invoice.seller.name) {
+    warnings.push({ field: "seller", message: "Brak danych sprzedawcy w pliku XML." });
+  }
+  if (!invoice.buyer.nip && !invoice.buyer.name && !invoice.buyer.no_identifier) {
+    warnings.push({ field: "buyer", message: "Brak danych nabywcy w pliku XML." });
+  }
+  if (!invoice.currency) {
+    warnings.push({ field: "currency", message: "Brak waluty — przyjęto PLN." });
+    invoice.currency = "PLN";
+  }
+  if (invoice.line_items.length === 0) {
+    warnings.push({ field: "line_items", message: "Faktura nie zawiera żadnych pozycji." });
+  }
 
   // Format amounts
   invoice.total_amount_fmt = formatAmount(invoice.total_amount);
@@ -90,7 +122,7 @@ export async function buildContext(
   const qrUrl = await buildVerificationUrl(invoice.seller.nip, invoice.invoice_date, xmlBytes);
   const qrImage = await generateQrDataUrl(qrUrl);
 
-  return {
+  const context: RenderContext = {
     invoice,
     invoice_type_pl: invoiceTypePl,
     invoice_type_en: invoiceTypeEn,
@@ -111,4 +143,6 @@ export async function buildContext(
     qr_url: qrUrl,
     qr_image: qrImage,
   };
+
+  return { context, warnings };
 }

@@ -11,6 +11,17 @@ function base64UrlEncode(bytes: Uint8Array): string {
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+/** Validate ISO date format YYYY-MM-DD */
+function isValidIsoDate(dateStr: string): boolean {
+  if (!dateStr || dateStr.length !== 10) return false;
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateStr)) return false;
+  // Check if it's a valid date
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year!, month! - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month! - 1 && date.getDate() === day;
+}
+
 /**
  * Build the KSeF QR verification URL.
  *
@@ -21,6 +32,11 @@ export async function buildVerificationUrl(
   invoiceDateIso: string,
   xmlBytes: Uint8Array,
 ): Promise<string> {
+  // Validate date format
+  if (!isValidIsoDate(invoiceDateIso)) {
+    throw new Error(`Nieprawidłowy format daty: "${invoiceDateIso}". Oczekiwano YYYY-MM-DD.`);
+  }
+
   // Copy bytes into a fresh ArrayBuffer — TS narrows Uint8Array.buffer to
   // ArrayBuffer | SharedArrayBuffer and digest only accepts the former.
   const buf = new ArrayBuffer(xmlBytes.byteLength);

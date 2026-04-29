@@ -3,16 +3,46 @@ import { ksefNumberFromFilename } from "./parser";
 import { renderInvoice } from "./render";
 import type { RenderContext } from "./types";
 
-const xmlFileInput = document.getElementById("xml-file") as HTMLInputElement;
-const ksefIdInput = document.getElementById("ksef-id") as HTMLInputElement;
-const statusMsg = document.getElementById("status-msg") as HTMLDivElement;
-const formActions = document.getElementById("form-actions") as HTMLDivElement;
-const generateBtn = document.getElementById("generate-btn") as HTMLButtonElement;
-const skipKsefBtn = document.getElementById("skip-ksef-btn") as HTMLButtonElement;
-const uploadPanel = document.getElementById("upload-panel") as HTMLDivElement;
-const invoiceRoot = document.getElementById("invoice-root") as HTMLDivElement;
-const pdfBtn = document.getElementById("pdf-btn") as HTMLButtonElement;
-const resetBtn = document.getElementById("reset-btn") as HTMLButtonElement;
+// DOM element helpers with null checks
+function getElement<T extends HTMLElement>(id: string): T {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Brak elementu #${id} w HTML`);
+  return el as T;
+}
+
+const xmlFileInput = getElement<HTMLInputElement>("xml-file");
+const ksefIdInput = getElement<HTMLInputElement>("ksef-id");
+const statusMsg = getElement<HTMLDivElement>("status-msg");
+const formActions = getElement<HTMLDivElement>("form-actions");
+const generateBtn = getElement<HTMLButtonElement>("generate-btn");
+const skipKsefBtn = getElement<HTMLButtonElement>("skip-ksef-btn");
+const uploadPanel = getElement<HTMLDivElement>("upload-panel");
+const invoiceRoot = getElement<HTMLDivElement>("invoice-root");
+const pdfBtn = getElement<HTMLButtonElement>("pdf-btn");
+const resetBtn = getElement<HTMLButtonElement>("reset-btn");
+const toastContainer = getElement<HTMLDivElement>("toast-container");
+
+// Toast notification system
+export function showToast(message: string, kind: "warn" | "error" | "info" = "warn", autoClose = 8000): void {
+  const toast = document.createElement("div");
+  toast.className = `toast ${kind}`;
+
+  const text = document.createElement("span");
+  text.textContent = message;
+  toast.appendChild(text);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "toast-close";
+  closeBtn.textContent = "×";
+  closeBtn.onclick = () => toast.remove();
+  toast.appendChild(closeBtn);
+
+  toastContainer.appendChild(toast);
+
+  if (autoClose > 0) {
+    setTimeout(() => toast.remove(), autoClose);
+  }
+}
 
 let pendingFile: File | null = null;
 let currentContext: RenderContext | null = null;
@@ -76,14 +106,29 @@ skipKsefBtn.addEventListener("click", () => {
 
 async function loadFile(file: File) {
   clearStatus();
+  // Clear previous toasts
+  toastContainer.innerHTML = "";
+
   try {
+    // File size limit (10 MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      showStatus("Plik jest zbyt duży (max 10 MB).");
+      return;
+    }
+
     const xmlBytes = new Uint8Array(await file.arrayBuffer());
     const xmlString = new TextDecoder("utf-8").decode(xmlBytes);
     const ksefNumber = ksefIdInput.value.trim();
-    const ctx = await buildContext(xmlString, xmlBytes, ksefNumber);
+    const { context: ctx, warnings } = await buildContext(xmlString, xmlBytes, ksefNumber);
+
+    // Show validation warnings as toasts
+    for (const warn of warnings) {
+      showToast(warn.message, "warn");
+    }
 
     invoiceRoot.innerHTML = renderInvoice(ctx);
-    document.title = `Faktura ${ctx.invoice.invoice_number}`;
+    document.title = `Faktura ${ctx.invoice.invoice_number || "bez numeru"}`;
     currentContext = ctx;
     pendingFile = null;
 

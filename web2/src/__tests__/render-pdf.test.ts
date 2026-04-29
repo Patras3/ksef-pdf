@@ -18,7 +18,7 @@ const FIXTURE = resolve(__dirname, "../../../tests/fixtures/sample_invoice.xml")
 async function renderPdfBytes(): Promise<Uint8Array> {
   const xmlString = readFileSync(FIXTURE, "utf8");
   const xmlBytes = new Uint8Array(readFileSync(FIXTURE));
-  const ctx = await buildContext(xmlString, xmlBytes, "");
+  const { context: ctx } = await buildContext(xmlString, xmlBytes, "");
 
   // PdfPrinter (server-side) needs fonts on disk — write Roboto from vfs.
   const fontDir = mkdtempSync(join(tmpdir(), "ksef-fonts-"));
