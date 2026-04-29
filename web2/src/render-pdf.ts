@@ -518,25 +518,23 @@ function buildAnnotations(ctx: RenderContext): Content | null {
 function buildPaymentBlock(ctx: RenderContext): Content {
   const { invoice } = ctx;
 
-  // Column 1: status + forma
-  const statusCol: Content = {
-    stack: [
-      { text: "Informacja o płatności / Payment status:", style: "labelField" },
-      {
-        text: `${ctx.payment_status_pl} / ${ctx.payment_status_en}`,
-        color: "#000",
-        margin: [0, 0, 0, 3],
-      },
-      { text: "Forma płatności / Payment method:", style: "labelField" },
-      { text: `${ctx.payment_form_pl} / ${ctx.payment_form_en}`, color: "#000" },
-    ],
-  };
-
-  // Column 2: terms (Opis płatności)
-  let termsCol: Content;
+  // Left column: status + forma + (terms if present)
+  const leftStack: Content[] = [
+    { text: "Informacja o płatności / Payment status:", style: "labelField" },
+    {
+      text: `${ctx.payment_status_pl} / ${ctx.payment_status_en}`,
+      color: "#000",
+      margin: [0, 0, 0, 4],
+    },
+    { text: "Forma płatności / Payment method:", style: "labelField" },
+    {
+      text: `${ctx.payment_form_pl} / ${ctx.payment_form_en}`,
+      color: "#000",
+    },
+  ];
   if (invoice.payment.terms) {
     const t = invoice.payment.terms;
-    termsCol = {
+    leftStack.push({
       table: {
         widths: ["*"],
         body: [
@@ -558,57 +556,57 @@ function buildPaymentBlock(ctx: RenderContext): Content {
         ],
       },
       layout: "noBorders",
-    };
-  } else {
-    termsCol = { text: "" };
+      margin: [0, 4, 0, 0],
+    });
   }
 
-  // Column 3: bank account
+  // Right column: bank account
   const acc = invoice.payment.bank_account;
-  let bankCol: Content;
+  const rightStack: Content[] = [];
   if (acc) {
     const rows: Content[][] = [];
     const labelCell = (pl: string, en: string): Content => ({
       stack: [
-        { text: pl, bold: true, fontSize: 6.5 },
-        { text: en, fontSize: 6, color: COLOR_LABEL_MUTED },
+        { text: pl, bold: true, fontSize: 7 },
+        { text: en, fontSize: 6.5, color: COLOR_LABEL_MUTED },
       ],
       fillColor: COLOR_TABLE_HEAD_BG,
     });
     if (acc.iban)
-      rows.push([labelCell("Pełny nr rachunku", "Account number (IBAN)"), { text: acc.iban, fontSize: 7 }]);
-    if (acc.swift) rows.push([labelCell("Kod SWIFT", "SWIFT code"), { text: acc.swift, fontSize: 7 }]);
-    if (acc.bank_name) rows.push([labelCell("Nazwa banku", "Bank name"), { text: acc.bank_name, fontSize: 7 }]);
+      rows.push([labelCell("Pełny numer rachunku", "Account number (IBAN)"), { text: acc.iban, fontSize: 7.5 }]);
+    if (acc.swift) rows.push([labelCell("Kod SWIFT", "SWIFT code"), { text: acc.swift, fontSize: 7.5 }]);
+    if (acc.bank_name) rows.push([labelCell("Nazwa banku", "Bank name"), { text: acc.bank_name, fontSize: 7.5 }]);
     if (acc.description)
-      rows.push([labelCell("Opis rachunku", "Account description"), { text: acc.description, fontSize: 7 }]);
-    bankCol =
-      rows.length > 0
-        ? {
-            stack: [
-              { text: "Numer rachunku bankowego / Bank Account Number", style: "labelField", bold: true, color: COLOR_PRIMARY },
-              {
-                table: {
-                  dontBreakRows: true,
-                  widths: [70, "*"],
-                  body: rows,
-                },
-                layout: {
-                  hLineWidth: () => 0.5,
-                  vLineWidth: () => 0.5,
-                  hLineColor: () => COLOR_TABLE_BORDER,
-                  vLineColor: () => COLOR_TABLE_BORDER,
-                  paddingLeft: () => 4,
-                  paddingRight: () => 4,
-                  paddingTop: () => 1.5,
-                  paddingBottom: () => 1.5,
-                },
-                margin: [0, 1, 0, 0],
-              },
-            ],
-          }
-        : { text: "" };
-  } else {
-    bankCol = { text: "" };
+      rows.push([labelCell("Opis rachunku", "Account description"), { text: acc.description, fontSize: 7.5 }]);
+    if (rows.length > 0) {
+      rightStack.push(
+        {
+          text: "Numer rachunku bankowego / Bank Account Number",
+          style: "labelField",
+          bold: true,
+          color: COLOR_PRIMARY,
+          fontSize: 8,
+          margin: [0, 0, 0, 2],
+        },
+        {
+          table: {
+            dontBreakRows: true,
+            widths: [105, "*"],
+            body: rows,
+          },
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => COLOR_TABLE_BORDER,
+            vLineColor: () => COLOR_TABLE_BORDER,
+            paddingLeft: () => 5,
+            paddingRight: () => 5,
+            paddingTop: () => 2,
+            paddingBottom: () => 2,
+          },
+        },
+      );
+    }
   }
 
   return {
@@ -616,8 +614,11 @@ function buildPaymentBlock(ctx: RenderContext): Content {
     stack: [
       { text: "Płatność / Payment", style: "sectionTitle" },
       {
-        columns: [statusCol, termsCol, bankCol],
-        columnGap: 10,
+        columns: [
+          { width: 195, stack: leftStack },
+          { width: "*", stack: rightStack.length > 0 ? rightStack : [{ text: "" }] },
+        ],
+        columnGap: 14,
       },
     ],
     margin: [0, 0, 0, 4],

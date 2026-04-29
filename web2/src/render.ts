@@ -52,13 +52,15 @@ export function renderInvoice(ctx: RenderContext): string {
     : "";
 
   const exchangeBlock = invoice.exchange_rate
-    ? `<div class="label-field">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>
-       ${
-         ctx.exchange_rate_is_global
-           ? `<div class="label-en" style="font-style: italic; margin-top: 2px;">Kurs waluty wspólny dla wszystkich wierszy faktury</div>
-              <div class="label-en" style="font-style: italic;">Exchange rate common for all invoice lines</div>`
-           : ""
-       }`
+    ? ctx.exchange_rate_is_global
+      ? `<div style="display: flex; gap: 10px; align-items: flex-start;">
+           <div class="label-field" style="white-space: nowrap;">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>
+           <div>
+             <div class="label-en" style="font-style: italic;">wspólny dla wszystkich wierszy faktury</div>
+             <div class="label-en" style="font-style: italic;">common for all invoice lines</div>
+           </div>
+         </div>`
+      : `<div class="label-field">Kurs waluty / Exchange rate: <span style="color: #000;">${escape(ctx.exchange_rate_formatted)}</span></div>`
     : "";
 
   const saleDateBlock = invoice.sale_date
@@ -135,7 +137,7 @@ export function renderInvoice(ctx: RenderContext): string {
       : "";
 
   const paymentTermsBlock = invoice.payment.terms
-    ? `<div class="payment-terms-box">
+    ? `<div class="payment-terms-box" style="margin-top: 6px;">
          <div class="label-field" style="margin-bottom: 2px;">Opis płatności / Payment terms:</div>
          <div style="font-size: 10px;">
            ${escape(invoice.payment.terms.quantity)} ${escape(invoice.payment.terms.unit)}
@@ -144,7 +146,7 @@ export function renderInvoice(ctx: RenderContext): string {
        </div>`
     : "";
 
-  const bankAccountBlock = invoice.payment.bank_account
+  const bankAccountInline = invoice.payment.bank_account
     ? (() => {
         const acc = invoice.payment.bank_account!;
         const row = (label: string, en: string, val: string) =>
@@ -155,8 +157,8 @@ export function renderInvoice(ctx: RenderContext): string {
                </tr>`
             : "";
         return `
-          <div class="section">
-            <div class="section-title">Numer rachunku bankowego / Bank Account Number</div>
+          <div class="bank-subsection">
+            <div class="label-field" style="font-weight: bold; color: #1a5276; margin-bottom: 3px;">Numer rachunku bankowego / Bank Account Number</div>
             <table class="bank">
               ${row("Pełny numer rachunku", "Account number (IBAN)", acc.iban)}
               ${row("Kod SWIFT", "SWIFT code", acc.swift)}
@@ -281,39 +283,36 @@ ${taxSummaryBlock}
 
 ${annotationsBlock}
 
-<div class="section">
+<div class="section payment-block">
   <div class="section-title">Płatność / Payment</div>
-  <div class="label-field">
-    Informacja o płatności / Payment status:
-    <span style="color: #000;">${escape(ctx.payment_status_pl)} / ${escape(ctx.payment_status_en)}</span>
+  <div class="payment-grid">
+    <div class="payment-left">
+      <div class="label-field">Informacja o płatności / Payment status:</div>
+      <div style="margin-bottom: 4px;">${escape(ctx.payment_status_pl)} / ${escape(ctx.payment_status_en)}</div>
+      <div class="label-field">Forma płatności / Payment method:</div>
+      <div>${escape(ctx.payment_form_pl)} / ${escape(ctx.payment_form_en)}</div>
+      ${paymentTermsBlock}
+    </div>
+    <div class="payment-right">
+      ${bankAccountInline}
+    </div>
   </div>
-  <div class="label-field">
-    Forma płatności / Payment method:
-    <span style="color: #000;">${escape(ctx.payment_form_pl)} / ${escape(ctx.payment_form_en)}</span>
-  </div>
-  ${paymentTermsBlock}
 </div>
-
-${bankAccountBlock}
 
 ${footnotesBlock}
 
 <div class="qr-section">
-  <div class="qr-header">
-    Sprawdź, czy Twoja faktura znajduje się w KSeF!<br />
-    <span style="font-size: 10px; font-weight: normal; color: #555;">Check if your invoice is registered in KSeF!</span>
-  </div>
   <div class="qr-content">
     <div class="qr-image">
       <img src="${escape(ctx.qr_image)}" alt="QR kod weryfikacyjny KSeF" />
     </div>
     <div>
-      <div style="font-size: 10px; color: #555; font-weight: bold; margin-bottom: 6px;">
-        Nie możesz zeskanować kodu z obrazka? Kliknij w link weryfikacyjny i przejdź do weryfikacji faktury!<br />
-        <span style="font-weight: normal; color: #999;">Can't scan the QR code? Click the verification link below to verify this invoice!</span>
+      <div class="qr-header">
+        Sprawdź, czy Twoja faktura znajduje się w KSeF!<br />
+        <span style="font-size: 9px; font-weight: normal; color: #555;">Check if your invoice is registered in KSeF!</span>
       </div>
-      <div class="label-field" style="margin-bottom: 2px;">Link weryfikacyjny / Verification link:</div>
-      <div class="qr-link" style="margin-bottom: 8px;">${escape(ctx.qr_url)}</div>
+      <div class="label-field" style="margin-top: 4px; margin-bottom: 1px;">Link weryfikacyjny / Verification link:</div>
+      <div class="qr-link"><a href="${escape(ctx.qr_url)}">${escape(ctx.qr_url)}</a></div>
       ${ksefInQr}
     </div>
   </div>

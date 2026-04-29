@@ -181,39 +181,40 @@ table.bank td.label {
 }
 
 .qr-section {
-    page-break-before: always;
-    border-top: 3px solid #1a5276;
-    padding-top: 12px;
+    border-top: 1.5px solid #1a5276;
+    padding-top: 6px;
     margin-top: 4px;
 }
 
 .qr-header {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     color: #27ae60;
-    margin-bottom: 8px;
 }
 
 .qr-content {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     align-items: flex-start;
 }
 
 .qr-image img {
-    width: 130px;
-    height: 130px;
+    width: 80px;
+    height: 80px;
+    display: block;
 }
 
 .qr-link {
     word-break: break-all;
     color: #2980b9;
     font-size: 9px;
+    margin-bottom: 4px;
 }
+.qr-link a { color: inherit; text-decoration: none; }
 
 .qr-ksef-nr {
     font-size: 9px;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 .payment-terms-box {
@@ -221,4 +222,24 @@ table.bank td.label {
     padding: 5px 8px;
     background: #f8f9fa;
     border-radius: 3px;
+}
+
+.payment-grid {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+.payment-grid .payment-left {
+    flex: 0 0 38%;
+    min-width: 0;
+}
+.payment-grid .payment-right {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.bank-subsection .bank {
+    width: 100%;
+}
+.bank-subsection .bank td.label {
+    width: 110px;
 }
