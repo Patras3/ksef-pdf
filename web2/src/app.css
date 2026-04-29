@@ -1,0 +1,205 @@
+/* Screen-only — PDF jest budowany przez pdfmake niezależnie. */
+body {
+    background: #e9ecef;
+    padding: 20mm;
+    font-family: sans-serif;
+    color: #222;
+}
+
+#upload-panel {
+    background: white;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 24px 32px 28px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+#upload-panel h1 {
+    color: #1a5276;
+    font-size: 22px;
+    margin: 0 0 6px;
+}
+#upload-panel .subtitle {
+    color: #555;
+    font-size: 13px;
+    margin: 0 0 24px;
+    line-height: 1.4;
+}
+
+.form-row {
+    margin-bottom: 16px;
+}
+.form-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #1a5276;
+    margin-bottom: 4px;
+}
+.form-row input[type="file"],
+.form-row input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.form-row input[type="text"]:focus,
+.form-row input[type="file"]:focus {
+    outline: none;
+    border-color: #1a5276;
+    box-shadow: 0 0 0 2px rgba(26, 82, 118, 0.15);
+}
+.form-row .hint {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #777;
+}
+.form-row .hint code {
+    background: #f0f3f5;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-family: monospace;
+}
+
+.status-msg {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+.status-msg.error {
+    background: #fde0dc;
+    border: 1px solid #f1948a;
+    color: #922b21;
+}
+.status-msg.info {
+    background: #e8f4f9;
+    border: 1px solid #aed6f1;
+    color: #1b4f72;
+}
+.status-msg.warn {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.form-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.form-actions button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+}
+.form-actions button.primary {
+    background: #27ae60;
+    color: white;
+}
+.form-actions button.primary:hover { background: #1f8c4d; }
+.form-actions button.primary:disabled { background: #888; cursor: not-allowed; }
+.form-actions button.secondary {
+    background: white;
+    color: #6c757d;
+    border: 1px solid #bdc3c7;
+}
+.form-actions button.secondary:hover { background: #f8f9fa; }
+
+#invoice-root {
+    background: white;
+    max-width: 184mm;
+    margin: 0 auto;
+    padding: 12mm 13mm 16mm 13mm;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+#pdf-btn,
+#reset-btn {
+    position: fixed;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    color: white;
+}
+#pdf-btn {
+    bottom: 24px;
+    right: 24px;
+    background: #27ae60;
+}
+#pdf-btn:hover { background: #1f8c4d; }
+#pdf-btn:disabled { background: #888; cursor: wait; }
+#reset-btn {
+    bottom: 24px;
+    right: 200px;
+    background: #6c757d;
+}
+#reset-btn:hover { background: #5a6268; }
+
+/* Toast notifications */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+}
+.toast {
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: toast-in 0.3s ease-out;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.toast.warn {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #664d03;
+}
+.toast.error {
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    color: #842029;
+}
+.toast.info {
+    background: #cff4fc;
+    border: 1px solid #9eeaf9;
+    color: #055160;
+}
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+    padding: 0;
+    line-height: 1;
+    margin-left: auto;
+}
+.toast-close:hover { opacity: 1; }
+@keyframes toast-in {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}

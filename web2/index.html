@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KSeF PDF — generator faktur</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/app.css" />
+  </head>
+  <body>
+    <div id="upload-panel">
+      <h1>Generator PDF z faktury KSeF</h1>
+      <p class="subtitle">
+        Wczytaj plik XML faktury (FA(3)). Dane zostają w Twojej przeglądarce — nic nie jest wysyłane na serwer.
+      </p>
+
+      <div class="form-row">
+        <label for="xml-file">Plik XML faktury:</label>
+        <input id="xml-file" type="file" accept=".xml,application/xml,text/xml" />
+      </div>
+
+      <div class="form-row">
+        <label for="ksef-id">Numer KSeF:</label>
+        <input
+          id="ksef-id"
+          type="text"
+          placeholder="np. 1111111111-20260421-AB12CD34EF56-01"
+          autocomplete="off"
+        />
+        <div class="hint">
+          Wstawi się automatycznie, jeśli nazwa pliku ma format
+          <code>NIP-YYYYMMDD-XXXXXXXXXXXX-NN</code>.
+        </div>
+      </div>
+
+      <div id="status-msg" class="status-msg" hidden></div>
+
+      <div class="form-actions" id="form-actions" hidden>
+        <button id="generate-btn" type="button" class="primary">Generuj fakturę</button>
+        <button id="skip-ksef-btn" type="button" class="secondary">
+          Generuj bez numeru KSeF
+        </button>
+      </div>
+    </div>
+
+    <div id="invoice-root" hidden></div>
+
+    <button id="pdf-btn" type="button" hidden>Pobierz PDF</button>
+    <button id="reset-btn" type="button" hidden>Wczytaj inny plik</button>
+
+    <div id="toast-container"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

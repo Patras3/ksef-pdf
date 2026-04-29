@@ -1,0 +1,32 @@
+{
+  "name": "ksef-pdf-web2",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build:fonts": "node scripts/extract-fonts.mjs",
+    "predev": "npm run build:fonts",
+    "prebuild": "npm run build:fonts",
+    "postinstall": "npm run build:fonts",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "pretest": "npm run build:fonts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@types/qrcode": "^1.5.6",
+    "n2words": "^4.0.0",
+    "pdfmake": "^0.2.10",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/pdfmake": "^0.2.9",
+    "jsdom": "^29.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vitest": "^4.1.5"
+  }
+}
