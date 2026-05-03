@@ -18,9 +18,19 @@ const generateBtn = getElement<HTMLButtonElement>("generate-btn");
 const skipKsefBtn = getElement<HTMLButtonElement>("skip-ksef-btn");
 const uploadPanel = getElement<HTMLDivElement>("upload-panel");
 const invoiceRoot = getElement<HTMLDivElement>("invoice-root");
-const pdfBtn = getElement<HTMLButtonElement>("pdf-btn");
-const resetBtn = getElement<HTMLButtonElement>("reset-btn");
+const floatingActions = getElement<HTMLDivElement>("floating-actions");
 const toastContainer = getElement<HTMLDivElement>("toast-container");
+
+// Both the sticky top action bar and the floating bottom-right buttons expose
+// data-action="pdf"/"reset"; we treat them as a single logical action set.
+const pdfBtns = document.querySelectorAll<HTMLButtonElement>('button[data-action="pdf"]');
+const resetBtns = document.querySelectorAll<HTMLButtonElement>('button[data-action="reset"]');
+
+function setHidden(els: NodeListOf<HTMLElement> | HTMLElement[], hidden: boolean) {
+  els.forEach((el) => {
+    el.hidden = hidden;
+  });
+}
 
 // Toast notification system
 export function showToast(message: string, kind: "warn" | "error" | "info" = "warn", autoClose = 8000): void {
@@ -132,34 +142,38 @@ async function loadFile(file: File) {
 
     uploadPanel.hidden = true;
     invoiceRoot.hidden = false;
-    pdfBtn.hidden = false;
-    resetBtn.hidden = false;
+    setHidden(pdfBtns, false);
+    setHidden(resetBtns, false);
+    floatingActions.hidden = false;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     showStatus(`Nie udało się wczytać faktury: ${message}`);
   }
 }
 
-resetBtn.addEventListener("click", () => {
+function reset() {
   currentContext = null;
   pendingFile = null;
   uploadPanel.hidden = false;
   invoiceRoot.hidden = true;
   invoiceRoot.innerHTML = "";
-  pdfBtn.hidden = true;
-  resetBtn.hidden = true;
+  setHidden(pdfBtns, true);
+  setHidden(resetBtns, true);
+  floatingActions.hidden = true;
   formActions.hidden = true;
   xmlFileInput.value = "";
   ksefIdInput.value = "";
   clearStatus();
   document.title = "KSeF PDF — generator faktur";
-});
+}
 
-pdfBtn.addEventListener("click", async () => {
+async function downloadPdf() {
   if (!currentContext) return;
-  pdfBtn.disabled = true;
-  const original = pdfBtn.textContent;
-  pdfBtn.textContent = "Generowanie...";
+  const originals = Array.from(pdfBtns).map((b) => b.textContent);
+  pdfBtns.forEach((b) => {
+    b.disabled = true;
+    b.textContent = "Generowanie...";
+  });
   try {
     const [pdfMakeModule, fontsModule, { buildDocDefinition }] = await Promise.all([
       import("pdfmake/build/pdfmake"),
@@ -174,10 +188,15 @@ pdfBtn.addEventListener("click", async () => {
       .createPdf(buildDocDefinition(currentContext))
       .download(filename);
   } finally {
-    pdfBtn.disabled = false;
-    pdfBtn.textContent = original;
+    pdfBtns.forEach((b, i) => {
+      b.disabled = false;
+      b.textContent = originals[i] ?? "Pobierz PDF";
+    });
   }
-});
+}
+
+resetBtns.forEach((b) => b.addEventListener("click", reset));
+pdfBtns.forEach((b) => b.addEventListener("click", () => void downloadPdf()));
 
 // Assemble the contact email in-runtime so static scrapers don't pick it up.
 const emailLink = document.getElementById("contact-email") as HTMLAnchorElement | null;

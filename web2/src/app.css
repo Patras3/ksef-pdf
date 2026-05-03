@@ -26,8 +26,10 @@ body {
     display: flex;
     gap: 8px;
     flex-shrink: 0;
+    margin-left: auto;
 }
-.action-bar-buttons button {
+.pdf-btn,
+.reset-btn {
     border: none;
     border-radius: 6px;
     padding: 8px 16px;
@@ -36,21 +38,34 @@ body {
     cursor: pointer;
     color: white;
 }
-.action-bar-buttons #pdf-btn {
-    background: #27ae60;
+.pdf-btn { background: #27ae60; }
+.pdf-btn:hover { background: #1f8c4d; }
+.pdf-btn:disabled { background: #888; cursor: wait; }
+.reset-btn { background: #6c757d; }
+.reset-btn:hover { background: #5a6268; }
+
+#floating-actions {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
 }
-.action-bar-buttons #pdf-btn:hover { background: #1f8c4d; }
-.action-bar-buttons #pdf-btn:disabled { background: #888; cursor: wait; }
-.action-bar-buttons #reset-btn {
-    background: #6c757d;
+#floating-actions .pdf-btn,
+#floating-actions .reset-btn {
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-.action-bar-buttons #reset-btn:hover { background: #5a6268; }
 @media (max-width: 700px) {
     #action-bar {
         flex-wrap: wrap;
         gap: 8px;
     }
     body { padding-top: calc(96px + 20mm); }
+}
+@media print {
+    #floating-actions { display: none; }
 }
 
 #upload-panel {

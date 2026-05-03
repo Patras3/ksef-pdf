@@ -9,21 +9,6 @@
   </head>
   <body>
     <header id="action-bar">
-      <div class="action-bar-buttons">
-        <button id="pdf-btn" type="button" hidden>Pobierz PDF</button>
-        <button id="reset-btn" type="button" hidden>Wczytaj inny plik</button>
-      </div>
-      <aside id="contact-info">
-        Potrzebujesz dedykowanej wizualizacji? Napisz na
-        <a
-          id="contact-email"
-          href="#"
-          data-user="patrykdadas+ksef"
-          data-domain="gmail.com"
-          ><noscript>[włącz JavaScript, aby zobaczyć adres]</noscript></a
-        >
-        — wystawiam faktury VAT.
-      </aside>
       <a
         id="github-link"
         href="https://github.com/Patras3/ksef-pdf"
@@ -39,6 +24,25 @@
           />
         </svg>
       </a>
+      <aside id="contact-info">
+        Potrzebujesz dedykowanej wizualizacji? Napisz na
+        <a
+          id="contact-email"
+          href="#"
+          data-user="patrykdadas+ksef"
+          data-domain="gmail.com"
+          ><noscript>[włącz JavaScript, aby zobaczyć adres]</noscript></a
+        >
+        — wystawiam faktury VAT.
+      </aside>
+      <div class="action-bar-buttons">
+        <button data-action="reset" type="button" class="reset-btn" hidden>
+          Wczytaj inny plik
+        </button>
+        <button data-action="pdf" type="button" class="pdf-btn" hidden>
+          Pobierz PDF
+        </button>
+      </div>
     </header>
 
     <div id="upload-panel">
@@ -77,6 +81,11 @@
     </div>
 
     <div id="invoice-root" hidden></div>
+
+    <div id="floating-actions" hidden>
+      <button data-action="reset" type="button" class="reset-btn">Wczytaj inny plik</button>
+      <button data-action="pdf" type="button" class="pdf-btn">Pobierz PDF</button>
+    </div>
 
     <div id="toast-container"></div>
 
