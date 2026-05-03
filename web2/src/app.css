@@ -2,8 +2,55 @@
 body {
     background: #e9ecef;
     padding: 20mm;
+    padding-top: calc(56px + 20mm);
     font-family: sans-serif;
     color: #222;
+}
+
+#action-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #d5dce2;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    min-height: 40px;
+}
+.action-bar-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.action-bar-buttons button {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+.action-bar-buttons #pdf-btn {
+    background: #27ae60;
+}
+.action-bar-buttons #pdf-btn:hover { background: #1f8c4d; }
+.action-bar-buttons #pdf-btn:disabled { background: #888; cursor: wait; }
+.action-bar-buttons #reset-btn {
+    background: #6c757d;
+}
+.action-bar-buttons #reset-btn:hover { background: #5a6268; }
+@media (max-width: 700px) {
+    #action-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    body { padding-top: calc(96px + 20mm); }
 }
 
 #upload-panel {
@@ -138,33 +185,6 @@ body {
     #invoice-root .invoice-footer { display: none; }
 }
 
-#pdf-btn,
-#reset-btn {
-    position: fixed;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    color: white;
-}
-#pdf-btn {
-    bottom: 24px;
-    right: 24px;
-    background: #27ae60;
-}
-#pdf-btn:hover { background: #1f8c4d; }
-#pdf-btn:disabled { background: #888; cursor: wait; }
-#reset-btn {
-    bottom: 24px;
-    right: 200px;
-    background: #6c757d;
-}
-#reset-btn:hover { background: #5a6268; }
-
 /* Toast notifications */
 #toast-container {
     position: fixed;
@@ -220,12 +240,9 @@ body {
 }
 
 #github-link {
-    position: fixed;
-    top: 16px;
-    right: 16px;
     color: #1a5276;
-    z-index: 100;
     display: inline-flex;
+    flex-shrink: 0;
     transition: color 0.15s;
 }
 #github-link:hover { color: #154360; }
@@ -236,36 +253,19 @@ body {
 }
 
 #contact-info {
-    position: fixed;
-    bottom: 14px;
-    right: 14px;
-    max-width: 360px;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #d5dce2;
-    border-radius: 6px;
+    margin-left: auto;
+    max-width: 420px;
     font-size: 12px;
-    color: #444;
-    line-height: 1.4;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-    z-index: 100;
-}
-body.invoice-visible #contact-info {
-    bottom: 90px;
+    color: #555;
+    line-height: 1.35;
 }
 #contact-info a {
     color: #1a5276;
     text-decoration: none;
 }
 #contact-info a:hover { text-decoration: underline; }
-@media (max-width: 700px) {
-    #contact-info {
-        position: static;
-        margin: 24px auto 16px;
-        max-width: 600px;
-    }
-}
+
 @media print {
-    #github-link,
-    #contact-info { display: none; }
+    #action-bar { display: none; }
+    body { padding-top: 0; }
 }
