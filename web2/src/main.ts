@@ -134,6 +134,7 @@ async function loadFile(file: File) {
     invoiceRoot.hidden = false;
     pdfBtn.hidden = false;
     resetBtn.hidden = false;
+    document.body.classList.add("invoice-visible");
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     showStatus(`Nie udało się wczytać faktury: ${message}`);
@@ -149,6 +150,7 @@ resetBtn.addEventListener("click", () => {
   pdfBtn.hidden = true;
   resetBtn.hidden = true;
   formActions.hidden = true;
+  document.body.classList.remove("invoice-visible");
   xmlFileInput.value = "";
   ksefIdInput.value = "";
   clearStatus();

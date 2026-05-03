@@ -122,6 +122,21 @@ body {
     padding: 12mm 13mm 16mm 13mm;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
+#invoice-root .invoice-footer {
+    margin-top: 12mm;
+    padding-top: 4mm;
+    border-top: 1px solid #ecf0f1;
+    font-size: 9px;
+    color: #888;
+    text-align: left;
+}
+#invoice-root .invoice-footer a {
+    color: #2980b9;
+    text-decoration: underline;
+}
+@media print {
+    #invoice-root .invoice-footer { display: none; }
+}
 
 #pdf-btn,
 #reset-btn {
@@ -234,6 +249,9 @@ body {
     line-height: 1.4;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     z-index: 100;
+}
+body.invoice-visible #contact-info {
+    bottom: 90px;
 }
 #contact-info a {
     color: #1a5276;
