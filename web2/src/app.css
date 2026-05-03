@@ -2,8 +2,70 @@
 body {
     background: #e9ecef;
     padding: 20mm;
+    padding-top: calc(56px + 20mm);
     font-family: sans-serif;
     color: #222;
+}
+
+#action-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #d5dce2;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    min-height: 40px;
+}
+.action-bar-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+.pdf-btn,
+.reset-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+}
+.pdf-btn { background: #27ae60; }
+.pdf-btn:hover { background: #1f8c4d; }
+.pdf-btn:disabled { background: #888; cursor: wait; }
+.reset-btn { background: #6c757d; }
+.reset-btn:hover { background: #5a6268; }
+
+#floating-actions {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+}
+#floating-actions .pdf-btn,
+#floating-actions .reset-btn {
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+@media (max-width: 700px) {
+    #action-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    body { padding-top: calc(96px + 20mm); }
+}
+@media print {
+    #floating-actions { display: none; }
 }
 
 #upload-panel {
@@ -122,33 +184,21 @@ body {
     padding: 12mm 13mm 16mm 13mm;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
-
-#pdf-btn,
-#reset-btn {
-    position: fixed;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    color: white;
+#invoice-root .invoice-footer {
+    margin-top: 12mm;
+    padding-top: 4mm;
+    border-top: 1px solid #ecf0f1;
+    font-size: 9px;
+    color: #888;
+    text-align: left;
 }
-#pdf-btn {
-    bottom: 24px;
-    right: 24px;
-    background: #27ae60;
+#invoice-root .invoice-footer a {
+    color: #2980b9;
+    text-decoration: underline;
 }
-#pdf-btn:hover { background: #1f8c4d; }
-#pdf-btn:disabled { background: #888; cursor: wait; }
-#reset-btn {
-    bottom: 24px;
-    right: 200px;
-    background: #6c757d;
+@media print {
+    #invoice-root .invoice-footer { display: none; }
 }
-#reset-btn:hover { background: #5a6268; }
 
 /* Toast notifications */
 #toast-container {
@@ -202,4 +252,35 @@ body {
 @keyframes toast-in {
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
+}
+
+#github-link {
+    color: #1a5276;
+    display: inline-flex;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+#github-link:hover { color: #154360; }
+#github-link:focus-visible {
+    outline: 2px solid #1a5276;
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+#contact-info {
+    margin-left: auto;
+    max-width: 420px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.35;
+}
+#contact-info a {
+    color: #1a5276;
+    text-decoration: none;
+}
+#contact-info a:hover { text-decoration: underline; }
+
+@media print {
+    #action-bar { display: none; }
+    body { padding-top: 0; }
 }

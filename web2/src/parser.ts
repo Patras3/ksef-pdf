@@ -241,8 +241,10 @@ export function parseInvoiceXml(xml: string, ksefNumber = ""): InvoiceData {
   };
 }
 
+export const KSEF_NUMBER_REGEX = /^\d{10}-\d{8}-[A-Z0-9]{12}-[A-Z0-9]{2}$/;
+
 /** Detect KSeF number from filename — matches NIP-YYYYMMDD-XXXXXXXXXXXX-NN format. */
 export function ksefNumberFromFilename(filename: string): string {
   const stem = filename.replace(/\.[^.]+$/, "");
-  return /^\d{10}-\d{8}-[A-Z0-9]{12}-\d{2}$/.test(stem) ? stem : "";
+  return KSEF_NUMBER_REGEX.test(stem) ? stem : "";
 }

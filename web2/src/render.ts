@@ -322,5 +322,10 @@ ${footnotesBlock}
     </div>
   </div>
 </div>
+
+<div class="invoice-footer">
+  Wygenerowano przez / Generated with
+  <a href="https://patras3.github.io/ksef-pdf/" target="_blank" rel="noopener noreferrer">patras3.github.io/ksef-pdf</a>
+</div>
 `;
 }

@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+      web2: ${{ steps.filter.outputs.web2 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - 'app/**'
+              - 'tests/**'
+              - 'templates/**'
+              - 'pyproject.toml'
+              - 'Dockerfile'
+              - 'docker-compose.yml'
+              - '.github/workflows/test.yml'
+            web2:
+              - 'web2/**'
+              - '.github/workflows/test.yml'
+
+  python-tests:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install dependencies
+        run: pip install -e '.[dev]'
+      - name: Run pytest
+        run: pytest
+
+  web2-tests:
+    needs: changes
+    if: needs.changes.outputs.web2 == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web2/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Type-check and build
+        run: npm run build
+      - name: Run vitest
+        run: npm test

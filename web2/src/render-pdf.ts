@@ -752,12 +752,20 @@ export function buildDocDefinition(ctx: RenderContext): TDocumentDefinitions {
       subject: `${ctx.invoice_type_pl} — ${ctx.invoice.invoice_number}`,
     },
     content,
-    footer: (currentPage: number, pageCount: number) => ({
-      text: `${currentPage} z ${pageCount}`,
-      alignment: "right",
+    footer: () => ({
+      margin: [mm(13), 0, mm(13), mm(8)],
+      text: [
+        { text: "Wygenerowano przez / Generated with " },
+        {
+          text: "patras3.github.io/ksef-pdf",
+          link: "https://patras3.github.io/ksef-pdf/",
+          color: COLOR_LINK,
+          decoration: "underline",
+        },
+      ],
       fontSize: 6.5,
       color: COLOR_LABEL_MUTED,
-      margin: [0, 0, mm(13), mm(8)],
+      alignment: "left",
     }),
   };
 }
