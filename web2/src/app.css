@@ -203,3 +203,51 @@ body {
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+#github-link {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    color: #1a5276;
+    z-index: 100;
+    display: inline-flex;
+    transition: color 0.15s;
+}
+#github-link:hover { color: #154360; }
+#github-link:focus-visible {
+    outline: 2px solid #1a5276;
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+#contact-info {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    max-width: 360px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #d5dce2;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.4;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+}
+#contact-info a {
+    color: #1a5276;
+    text-decoration: none;
+}
+#contact-info a:hover { text-decoration: underline; }
+@media (max-width: 700px) {
+    #contact-info {
+        position: static;
+        margin: 24px auto 16px;
+        max-width: 600px;
+    }
+}
+@media print {
+    #github-link,
+    #contact-info { display: none; }
+}

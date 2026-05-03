@@ -104,6 +104,14 @@ describe("ksefNumberFromFilename", () => {
       ksefNumberFromFilename("1111111111-20260421-ABCDEF123456-01.xml"),
     ).toBe("1111111111-20260421-ABCDEF123456-01");
   });
+  it("accepts letters in the trailing NN segment (KSeF allows alphanumerics)", () => {
+    expect(
+      ksefNumberFromFilename("1111111111-20260421-ABCDEF123456-AB.xml"),
+    ).toBe("1111111111-20260421-ABCDEF123456-AB");
+    expect(
+      ksefNumberFromFilename("1111111111-20260421-ABCDEF123456-A1.xml"),
+    ).toBe("1111111111-20260421-ABCDEF123456-A1");
+  });
   it("returns empty for non-matching filename (stricter than Python: regex-based)", () => {
     expect(ksefNumberFromFilename("invoice-foo.xml")).toBe("");
     expect(ksefNumberFromFilename("sample_invoice.xml")).toBe("");

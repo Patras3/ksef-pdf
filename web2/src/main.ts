@@ -1,5 +1,5 @@
 import { buildContext } from "./build-context";
-import { ksefNumberFromFilename } from "./parser";
+import { KSEF_NUMBER_REGEX, ksefNumberFromFilename } from "./parser";
 import { renderInvoice } from "./render";
 import type { RenderContext } from "./types";
 
@@ -47,8 +47,6 @@ export function showToast(message: string, kind: "warn" | "error" | "info" = "wa
 let pendingFile: File | null = null;
 let currentContext: RenderContext | null = null;
 
-const KSEF_REGEX = /^\d{10}-\d{8}-[A-Z0-9]{12}-\d{2}$/;
-
 function showStatus(msg: string, kind: "error" | "info" | "warn" = "error") {
   statusMsg.textContent = msg;
   statusMsg.className = `status-msg ${kind}`;
@@ -86,7 +84,7 @@ xmlFileInput.addEventListener("change", () => {
 function updateGenerateButton() {
   const value = ksefIdInput.value.trim();
   generateBtn.disabled = value.length === 0;
-  generateBtn.textContent = KSEF_REGEX.test(value) || value.length === 0
+  generateBtn.textContent = KSEF_NUMBER_REGEX.test(value) || value.length === 0
     ? "Generuj fakturę"
     : "Generuj (numer ma nietypowy format)";
 }
@@ -180,3 +178,15 @@ pdfBtn.addEventListener("click", async () => {
     pdfBtn.textContent = original;
   }
 });
+
+// Assemble the contact email in-runtime so static scrapers don't pick it up.
+const emailLink = document.getElementById("contact-email") as HTMLAnchorElement | null;
+if (emailLink) {
+  const user = emailLink.dataset.user;
+  const domain = emailLink.dataset.domain;
+  if (user && domain) {
+    const addr = `${user}@${domain}`;
+    emailLink.textContent = addr;
+    emailLink.href = `mailto:${addr}`;
+  }
+}

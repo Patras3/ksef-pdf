@@ -753,11 +753,29 @@ export function buildDocDefinition(ctx: RenderContext): TDocumentDefinitions {
     },
     content,
     footer: (currentPage: number, pageCount: number) => ({
-      text: `${currentPage} z ${pageCount}`,
-      alignment: "right",
-      fontSize: 6.5,
-      color: COLOR_LABEL_MUTED,
-      margin: [0, 0, mm(13), mm(8)],
+      margin: [mm(13), 0, mm(13), mm(8)],
+      columns: [
+        {
+          text: [
+            { text: "Wygenerowano / Generated with " },
+            {
+              text: "patras3.github.io/ksef-pdf",
+              link: "https://patras3.github.io/ksef-pdf/",
+              color: COLOR_LINK,
+              decoration: "underline",
+            },
+          ],
+          fontSize: 6.5,
+          color: COLOR_LABEL_MUTED,
+          alignment: "left",
+        },
+        {
+          text: `${currentPage} z ${pageCount}`,
+          alignment: "right",
+          fontSize: 6.5,
+          color: COLOR_LABEL_MUTED,
+        },
+      ],
     }),
   };
 }
