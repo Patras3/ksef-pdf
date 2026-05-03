@@ -755,7 +755,7 @@ export function buildDocDefinition(ctx: RenderContext): TDocumentDefinitions {
     footer: () => ({
       margin: [mm(13), 0, mm(13), mm(8)],
       text: [
-        { text: "Wygenerowano / Generated with " },
+        { text: "Wygenerowano przez / Generated with " },
         {
           text: "patras3.github.io/ksef-pdf",
           link: "https://patras3.github.io/ksef-pdf/",
